@@ -1262,26 +1262,29 @@
             }, 800);
         }
 
+        // 结果数据缓存（避免onclick内嵌JSON的转义问题）
+        let _resultCache = [];
+
         function renderResults(task) {
             const panel = document.getElementById('resultPanel');
             const ok = task.results.filter(r => r.status === 'success').length;
             const fail = task.results.filter(r => r.status === 'failed').length;
             const wait = task.total - task.completed;
 
+            _resultCache = task.results;
+
             document.getElementById('resultSummary').innerHTML =
                 `<span class="text-green-400">${ok}✓</span> <span class="text-red-400">${fail}✗</span>` +
                 (wait > 0 ? ` <span class="text-yellow-400">${wait}⏳</span>` : '') + ` / ${task.total}`;
 
-            panel.innerHTML = task.results.map(r => {
+            panel.innerHTML = task.results.map((r, idx) => {
                 const s = r.status === 'success';
                 const lines = (r.output || r.error || '').split('\n').filter(l => l.trim());
                 const preview = lines.slice(0, 4).join('\n') || '(无输出)';
                 const totalLines = lines.length;
-                const escapedOutput = JSON.stringify(r.output || '');
-                const escapedError = JSON.stringify(r.error || '');
                 return `<div class="rounded-xl p-3 border animate-fade cursor-pointer transition-all hover:scale-[1.01]
             ${s ? 'border-green-500/20 bg-green-500/5 hover:bg-green-500/10' : 'border-red-500/20 bg-red-500/5 hover:bg-red-500/10'}"
-            onclick="showDetail('${r.host}', ${r.port}, ${escapedOutput}, ${escapedError}, ${r.exit_code}, ${r.duration})">
+            onclick="showDetailByIndex(${idx})">
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${s ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
                     <i class="fas ${s ? 'fa-check-circle' : 'fa-exclamation-circle'} text-[9px]"></i>${s ? '成功' : '失败'}
@@ -1302,6 +1305,12 @@
 
         // 详情弹窗数据存储
         let _detailData = { output: '', error: '', tab: 'stdout' };
+
+        function showDetailByIndex(idx) {
+            const r = _resultCache[idx];
+            if (!r) return;
+            showDetail(r.host, r.port, r.output || '', r.error || '', r.exit_code, r.duration);
+        }
 
         function showDetail(host, port, output, error, exitCode, duration) {
             _detailData = { output, error, tab: 'stdout' };
