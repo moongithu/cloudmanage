@@ -446,7 +446,12 @@
             <div class="p-3 border-b t-border flex items-center justify-between">
                 <h2 class="text-xs font-bold t-primary uppercase tracking-wider"><i
                         class="fas fa-chart-bar mr-1.5 text-brand-400"></i>执行结果</h2>
-                <span id="resultSummary" class="text-xs t-muted"></span>
+                <div class="flex items-center gap-2">
+                    <span id="resultSummary" class="text-xs t-muted"></span>
+                    <button id="expandAllBtn" onclick="showAllResults()"
+                        class="hidden text-[10px] px-2 py-0.5 rounded-md bg-brand-600 hover:bg-brand-500 text-white transition"
+                        title="展开全部结果"><i class="fas fa-expand mr-1"></i>全部</button>
+                </div>
             </div>
             <div id="resultPanel" class="flex-1 overflow-y-auto p-3 space-y-2">
                 <div class="text-center t-muted text-xs py-12"><i
@@ -696,6 +701,43 @@
                 <button onclick="submitBatchEdit()"
                     class="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm rounded-lg transition font-medium">确认修改</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ===== 全部结果汇总弹窗 ===== -->
+    <div id="allResultsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
+        onclick="if(event.target===this)closeModal('allResultsModal')">
+        <div class="glass rounded-2xl p-5 glow animate-fade flex flex-col"
+            style="width:90vw;max-width:1100px;height:85vh">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-bold t-primary"><i class="fas fa-th-list text-brand-400 mr-2"></i>全部执行结果
+                    <span id="allResultsCount" class="text-sm t-muted font-normal ml-2"></span>
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="filterAllResults('all')" id="filterAll"
+                        class="text-xs px-3 py-1 rounded-lg bg-brand-600 text-white transition">全部</button>
+                    <button onclick="filterAllResults('success')" id="filterSuccess"
+                        class="text-xs px-3 py-1 rounded-lg t-bg-btn text-green-400 hover:bg-green-500/20 transition"><i
+                            class="fas fa-check mr-1"></i>成功</button>
+                    <button onclick="filterAllResults('failed')" id="filterFailed"
+                        class="text-xs px-3 py-1 rounded-lg t-bg-btn text-red-400 hover:bg-red-500/20 transition"><i
+                            class="fas fa-times mr-1"></i>失败</button>
+                    <span class="w-px h-5 t-border bg-gray-600"></span>
+                    <button onclick="toggleAllSections(true)"
+                        class="text-xs px-2 py-1 rounded-lg t-bg-btn t-muted hover:text-brand-400 transition"
+                        title="展开全部"><i class="fas fa-angles-down"></i></button>
+                    <button onclick="toggleAllSections(false)"
+                        class="text-xs px-2 py-1 rounded-lg t-bg-btn t-muted hover:text-brand-400 transition"
+                        title="折叠全部"><i class="fas fa-angles-up"></i></button>
+                    <button onclick="copyAllResults()"
+                        class="text-xs px-3 py-1 rounded-lg t-bg-btn t-muted hover:text-brand-400 transition"><i
+                            class="fas fa-copy mr-1"></i>复制全部</button>
+                    <button onclick="closeModal('allResultsModal')"
+                        class="p-1.5 rounded-lg t-muted hover:text-brand-400 hover:t-bg-card transition"><i
+                            class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div id="allResultsBody" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
         </div>
     </div>
 
@@ -1272,6 +1314,7 @@
             const wait = task.total - task.completed;
 
             _resultCache = task.results;
+            document.getElementById('expandAllBtn').classList.toggle('hidden', task.results.length === 0);
 
             document.getElementById('resultSummary').innerHTML =
                 `<span class="text-green-400">${ok}✓</span> <span class="text-red-400">${fail}✗</span>` +
@@ -1361,6 +1404,94 @@
         function copyDetailOutput() {
             const text = document.getElementById('detailOutput').textContent;
             navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板'));
+        }
+
+        // ===== 全部结果汇总弹窗 =====
+        let _allResultsFilter = 'all';
+
+        function showAllResults() {
+            if (!_resultCache.length) return showToast('暂无结果', 'error');
+            _allResultsFilter = 'all';
+            renderAllResultsBody();
+            showModal('allResultsModal');
+        }
+
+        function renderAllResultsBody() {
+            const body = document.getElementById('allResultsBody');
+            const filtered = _allResultsFilter === 'all'
+                ? _resultCache
+                : _resultCache.filter(r => r.status === _allResultsFilter);
+
+            const ok = _resultCache.filter(r => r.status === 'success').length;
+            const fail = _resultCache.filter(r => r.status === 'failed').length;
+            document.getElementById('allResultsCount').textContent = `${ok} 成功 / ${fail} 失败 — 共 ${_resultCache.length} 台`;
+
+            // 更新筛选按钮样式
+            ['all', 'success', 'failed'].forEach(f => {
+                const btn = document.getElementById('filter' + f.charAt(0).toUpperCase() + f.slice(1));
+                if (f === _allResultsFilter) {
+                    btn.className = 'text-xs px-3 py-1 rounded-lg bg-brand-600 text-white transition';
+                } else if (f === 'success') {
+                    btn.className = 'text-xs px-3 py-1 rounded-lg t-bg-btn text-green-400 hover:bg-green-500/20 transition';
+                } else if (f === 'failed') {
+                    btn.className = 'text-xs px-3 py-1 rounded-lg t-bg-btn text-red-400 hover:bg-red-500/20 transition';
+                } else {
+                    btn.className = 'text-xs px-3 py-1 rounded-lg t-bg-btn t-muted hover:text-brand-400 transition';
+                }
+            });
+
+            if (!filtered.length) {
+                body.innerHTML = '<div class="text-center t-muted text-sm py-12">没有匹配的结果</div>';
+                return;
+            }
+
+            body.innerHTML = filtered.map((r, i) => {
+                const s = r.status === 'success';
+                const output = r.output || '';
+                const error = r.error || '';
+                const fullOutput = output + (error ? '\n\n━━━ STDERR ━━━\n' + error : '');
+                // 找到在 _resultCache 中的真实索引
+                const realIdx = _resultCache.indexOf(r);
+                return `<details class="group rounded-xl border overflow-hidden ${s ? 'border-green-500/20' : 'border-red-500/20'}">
+                    <summary class="flex items-center gap-2 px-4 py-2.5 cursor-pointer select-none ${s ? 'bg-green-500/5 hover:bg-green-500/10' : 'bg-red-500/5 hover:bg-red-500/10'} transition">
+                        <i class="fas fa-chevron-right text-[9px] t-hint transition-transform group-open:rotate-90"></i>
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${s ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                            <i class="fas ${s ? 'fa-check-circle' : 'fa-exclamation-circle'} text-[9px]"></i>${s ? '成功' : '失败'}
+                        </span>
+                        <span class="text-sm font-mono t-primary font-medium">${r.host}<span class="t-hint">:${r.port}</span></span>
+                        <span class="text-[11px] t-hint"><i class="fas fa-clock mr-0.5"></i>${r.duration}s</span>
+                        <span class="text-[11px] t-hint ml-auto">exit: ${r.exit_code}</span>
+                        <button onclick="event.stopPropagation();copySingleResult(${realIdx})" class="text-[10px] px-2 py-0.5 rounded t-bg-btn t-hint hover:text-brand-400 transition"><i class="fas fa-copy"></i></button>
+                    </summary>
+                    <pre class="px-4 py-3 text-[12px] font-mono t-muted leading-relaxed code-editor border-t t-border overflow-x-auto whitespace-pre-wrap select-text">${esc(fullOutput || '(无输出)')}</pre>
+                </details>`;
+            }).join('');
+        }
+
+        function filterAllResults(filter) {
+            _allResultsFilter = filter;
+            renderAllResultsBody();
+        }
+
+        function toggleAllSections(open) {
+            document.querySelectorAll('#allResultsBody details').forEach(d => d.open = open);
+        }
+
+        function copySingleResult(idx) {
+            const r = _resultCache[idx];
+            if (!r) return;
+            const text = (r.output || '') + (r.error ? '\n\n--- STDERR ---\n' + r.error : '') || '(无输出)';
+            navigator.clipboard.writeText(text).then(() => showToast('已复制'));
+        }
+
+        function copyAllResults() {
+            const text = _resultCache.map(r => {
+                const header = `══ ${r.host}:${r.port} [${r.status}] exit:${r.exit_code} ${r.duration}s ══`;
+                const output = r.output || '(无输出)';
+                const error = r.error ? '\n--- STDERR ---\n' + r.error : '';
+                return header + '\n' + output + error;
+            }).join('\n\n');
+            navigator.clipboard.writeText(text).then(() => showToast('已复制全部结果'));
         }
     </script>
 </body>
