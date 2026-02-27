@@ -7,7 +7,7 @@
 set -e
 
 APP_DIR="/opt/cloudmanage"
-REPO_URL="https://github.com/你的用户名/cloudmanage.git"
+REPO_URL="https://github.com/moongithu/cloudmanage.git"
 PORT=5001
 
 GREEN='\033[0;32m'
