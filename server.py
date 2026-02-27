@@ -263,10 +263,13 @@ def update_server(server_id):
     servers = load_servers()
     for s in servers:
         if s["id"] == server_id:
-            if "group_id" in data:
-                s["group_id"] = data["group_id"]
-            if "label" in data:
-                s["label"] = data["label"]
+            for key in ["group_id", "label", "host", "user"]:
+                if key in data:
+                    s[key] = data[key]
+            if "port" in data:
+                s["port"] = int(data["port"])
+            if "password" in data and data["password"]:
+                s["password"] = data["password"]
             save_servers(servers)
             return jsonify({"message": "更新成功"})
     return jsonify({"error": "服务器不存在"}), 404
@@ -277,6 +280,66 @@ def delete_server(server_id):
     servers = [s for s in servers if s["id"] != server_id]
     save_servers(servers)
     return jsonify({"message": "删除成功"})
+
+@app.route("/api/servers/batch-delete", methods=["POST"])
+def batch_delete_servers():
+    """批量删除服务器"""
+    data = request.json
+    ids = data.get("ids", [])
+    if not ids:
+        return jsonify({"error": "请选择要删除的服务器"}), 400
+    servers = load_servers()
+    before = len(servers)
+    servers = [s for s in servers if s["id"] not in ids]
+    save_servers(servers)
+    deleted = before - len(servers)
+    return jsonify({"message": f"已删除 {deleted} 台服务器", "deleted": deleted})
+
+@app.route("/api/servers/batch-update", methods=["POST"])
+def batch_update_servers():
+    """批量更新服务器属性（端口、密码、用户名、分组）"""
+    data = request.json
+    ids = data.get("ids", [])
+    updates = data.get("updates", {})
+    if not ids:
+        return jsonify({"error": "请选择要更新的服务器"}), 400
+    servers = load_servers()
+    count = 0
+    for s in servers:
+        if s["id"] in ids:
+            if "port" in updates and updates["port"]:
+                s["port"] = int(updates["port"])
+            if "password" in updates and updates["password"]:
+                s["password"] = updates["password"]
+            if "user" in updates and updates["user"]:
+                s["user"] = updates["user"]
+            if "group_id" in updates:
+                s["group_id"] = updates["group_id"]
+            count += 1
+    save_servers(servers)
+    return jsonify({"message": f"已更新 {count} 台服务器", "updated": count})
+
+@app.route("/api/servers/reorder", methods=["POST"])
+def reorder_servers():
+    """更新服务器排序"""
+    data = request.json
+    order = data.get("order", [])  # [{"id": "xxx", "group_id": "yyy"}, ...]
+    if not order:
+        return jsonify({"error": "无排序数据"}), 400
+    servers = load_servers()
+    id_map = {s["id"]: s for s in servers}
+    reordered = []
+    for item in order:
+        sid = item.get("id")
+        if sid in id_map:
+            s = id_map.pop(sid)
+            if "group_id" in item:
+                s["group_id"] = item["group_id"]
+            reordered.append(s)
+    # 追加未涉及的服务器（保留完整性）
+    reordered.extend(id_map.values())
+    save_servers(reordered)
+    return jsonify({"message": "排序已更新"})
 
 @app.route("/api/servers/import", methods=["POST"])
 def import_servers():

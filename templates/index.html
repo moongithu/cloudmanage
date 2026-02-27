@@ -322,6 +322,12 @@
                         class="flex-1 text-[11px] py-1 px-2 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition">全选</button>
                     <button onclick="deselectAllServers()"
                         class="flex-1 text-[11px] py-1 px-2 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition">取消</button>
+                    <button onclick="batchEditServers()"
+                        class="flex-1 text-[11px] py-1 px-2 rounded-md t-bg-btn hover:t-bg-card text-amber-400 hover:text-amber-300 transition"
+                        title="批量修改选中服务器"><i class="fas fa-pen-to-square mr-0.5"></i>编辑</button>
+                    <button onclick="batchDeleteServers()"
+                        class="flex-1 text-[11px] py-1 px-2 rounded-md t-bg-btn hover:t-bg-card text-red-400 hover:text-red-300 transition"
+                        title="批量删除选中服务器"><i class="fas fa-trash mr-0.5"></i>删除</button>
                 </div>
             </div>
             <div id="serverTree" class="flex-1 overflow-y-auto p-2 text-sm">
@@ -632,6 +638,49 @@
         </div>
     </div>
 
+    <!-- 批量编辑服务器弹窗 -->
+    <div id="batchEditModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
+        onclick="if(event.target===this)closeModal('batchEditModal')">
+        <div class="glass rounded-2xl p-5 w-[420px] glow animate-fade">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold t-primary"><i class="fas fa-pen-to-square text-amber-400 mr-2"></i>批量编辑
+                    <span id="batchEditCount" class="text-brand-400"></span>
+                </h3>
+                <button onclick="closeModal('batchEditModal')"
+                    class="p-1.5 rounded-lg t-muted hover:text-brand-400 hover:t-bg-card transition"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <p class="text-xs t-muted mb-3"><i class="fas fa-info-circle mr-1"></i>留空的字段不会被修改</p>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[11px] t-muted mb-0.5 block">端口</label>
+                    <input type="number" id="batchPort" placeholder="如 22"
+                        class="w-full px-3 py-2 t-bg-input border t-border rounded-lg text-sm t-primary placeholder-slate-500 focus:border-brand-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[11px] t-muted mb-0.5 block">密码</label>
+                    <input type="text" id="batchPassword" placeholder="新密码"
+                        class="w-full px-3 py-2 t-bg-input border t-border rounded-lg text-sm t-primary placeholder-slate-500 focus:border-brand-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[11px] t-muted mb-0.5 block">用户名</label>
+                    <input type="text" id="batchUser" placeholder="如 root"
+                        class="w-full px-3 py-2 t-bg-input border t-border rounded-lg text-sm t-primary placeholder-slate-500 focus:border-brand-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[11px] t-muted mb-0.5 block">移动到分组</label>
+                    <select id="batchGroup"
+                        class="w-full px-3 py-2 t-bg-input border t-border rounded-lg text-sm t-primary focus:border-brand-500 focus:outline-none">
+                        <option value="">— 不修改 —</option>
+                        <option value="__none__">未分组</option>
+                    </select>
+                </div>
+                <button onclick="submitBatchEdit()"
+                    class="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm rounded-lg transition font-medium">确认修改</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="fixed top-16 right-6 z-[100] hidden">
         <div class="glass rounded-xl px-4 py-2.5 animate-fade shadow-2xl flex items-center gap-2">
@@ -800,6 +849,103 @@
             try { await fetch(`/api/servers/${id}`, { method: 'DELETE' }); selectedIds.delete(id); showToast('已删除'); await loadServers(); renderTree(); } catch (e) { }
         }
 
+        // ===== 批量删除 =====
+        async function batchDeleteServers() {
+            if (selectedIds.size === 0) return showToast('请先选择服务器', 'error');
+            if (!confirm(`确认删除选中的 ${selectedIds.size} 台服务器？`)) return;
+            try {
+                const r = await fetch('/api/servers/batch-delete', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: [...selectedIds] })
+                });
+                const d = await r.json();
+                if (r.ok) { selectedIds.clear(); showToast(d.message); await loadServers(); renderTree(); }
+                else showToast(d.error, 'error');
+            } catch { showToast('删除失败', 'error'); }
+        }
+
+        // ===== 批量编辑 =====
+        function batchEditServers() {
+            if (selectedIds.size === 0) return showToast('请先选择服务器', 'error');
+            document.getElementById('batchEditCount').textContent = `(${selectedIds.size} 台)`;
+            document.getElementById('batchPort').value = '';
+            document.getElementById('batchPassword').value = '';
+            document.getElementById('batchUser').value = '';
+            // 填充分组选项
+            const sel = document.getElementById('batchGroup');
+            sel.innerHTML = '<option value="">— 不修改 —</option><option value="__none__">未分组</option>';
+            groups.forEach(g => sel.innerHTML += `<option value="${g.id}">${esc(g.name)}</option>`);
+            showModal('batchEditModal');
+        }
+
+        async function submitBatchEdit() {
+            const updates = {};
+            const port = document.getElementById('batchPort').value.trim();
+            const password = document.getElementById('batchPassword').value;
+            const user = document.getElementById('batchUser').value.trim();
+            const group = document.getElementById('batchGroup').value;
+            if (port) updates.port = port;
+            if (password) updates.password = password;
+            if (user) updates.user = user;
+            if (group === '__none__') updates.group_id = null;
+            else if (group) updates.group_id = group;
+            if (Object.keys(updates).length === 0) return showToast('没有要修改的内容', 'error');
+            try {
+                const r = await fetch('/api/servers/batch-update', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: [...selectedIds], updates })
+                });
+                const d = await r.json();
+                if (r.ok) { showToast(d.message); closeModal('batchEditModal'); await loadServers(); renderTree(); }
+                else showToast(d.error, 'error');
+            } catch { showToast('更新失败', 'error'); }
+        }
+
+        // ===== 单个编辑 =====
+        function editSingleServer(id) {
+            selectedIds.clear();
+            selectedIds.add(id);
+            const s = servers.find(x => x.id === id);
+            if (!s) return;
+            document.getElementById('batchEditCount').textContent = `(${s.host})`;
+            document.getElementById('batchPort').value = s.port || '';
+            document.getElementById('batchPassword').value = '';
+            document.getElementById('batchUser').value = s.user || '';
+            const sel = document.getElementById('batchGroup');
+            sel.innerHTML = '<option value="">— 不修改 —</option><option value="__none__">未分组</option>';
+            groups.forEach(g => sel.innerHTML += `<option value="${g.id}">${esc(g.name)}</option>`);
+            if (s.group_id) sel.value = s.group_id;
+            showModal('batchEditModal');
+        }
+
+        // ===== 拖拽排序 =====
+        let dragServerId = null;
+        function onDragStart(e, id) {
+            dragServerId = id;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', id);
+            // 拖拽选中的多台一起移
+            if (selectedIds.has(id) && selectedIds.size > 1) {
+                e.dataTransfer.setData('multi', 'true');
+            }
+        }
+        async function dropToGroup(groupId, e) {
+            const isMulti = e.dataTransfer.getData('multi') === 'true';
+            const ids = isMulti && selectedIds.has(dragServerId)
+                ? [...selectedIds]
+                : [dragServerId];
+            if (!ids.length) return;
+            try {
+                const r = await fetch('/api/servers/batch-update', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids, updates: { group_id: groupId } })
+                });
+                const d = await r.json();
+                if (r.ok) { showToast(`已移动 ${ids.length} 台到${groupId ? '分组' : '未分组'}`); await loadServers(); renderTree(); }
+            } catch { }
+            dragServerId = null;
+        }
+
         async function importFromFile() {
             const group_id = document.getElementById('importGroup').value || null;
             try {
@@ -867,15 +1013,15 @@
                     const collapsed = collapsedGroups.has(g.id);
                     const groupServerCount = countGroupServers(g.id);
                     html += `<div class="mb-0.5" style="padding-left:${depth * 12}px">
-                <div class="group-header flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer" onclick="toggleGroup('${g.id}')">
+                <div class="group-header flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer" onclick="toggleGroup('${g.id}')" ondragover="event.preventDefault();this.classList.add('bg-brand-500/20')" ondragleave="this.classList.remove('bg-brand-500/20')" ondrop="event.preventDefault();this.classList.remove('bg-brand-500/20');dropToGroup('${g.id}',event)">
                     <i class="fas fa-chevron-${collapsed ? 'right' : 'down'} text-[9px] t-muted w-3"></i>
                     <i class="fas fa-folder${collapsed ? '' : '-open'} text-xs text-amber-400/80"></i>
-                    <span class="text-xs font-medium text-dark-300 flex-1">${esc(g.name)}</span>
-                    <span class="text-[10px] text-dark-600">${groupServerCount}</span>
-                    <button onclick="event.stopPropagation();selectGroupServers('${g.id}')" class="p-0.5 rounded text-dark-600 hover:text-brand-400 transition" title="全选该组">
+                    <span class="text-xs font-medium t-secondary flex-1">${esc(g.name)}</span>
+                    <span class="text-[10px] t-hint">${groupServerCount}</span>
+                    <button onclick="event.stopPropagation();selectGroupServers('${g.id}')" class="p-0.5 rounded t-hint hover:text-brand-400 transition" title="全选该组">
                         <i class="fas fa-check-double text-[9px]"></i>
                     </button>
-                    <button onclick="event.stopPropagation();deleteGroup('${g.id}')" class="p-0.5 rounded text-dark-600 hover:text-red-400 transition" title="删除分组">
+                    <button onclick="event.stopPropagation();deleteGroup('${g.id}')" class="p-0.5 rounded t-hint hover:text-red-400 transition" title="删除分组">
                         <i class="fas fa-times text-[9px]"></i>
                     </button>
                 </div>`;
@@ -887,17 +1033,20 @@
 
                 childServers.forEach(s => {
                     const sel = selectedIds.has(s.id);
-                    html += `<div class="server-card rounded-lg px-2 py-1.5 border border-transparent cursor-pointer ${sel ? 'selected' : ''}" style="padding-left:${depth * 12 + 8}px" onclick="toggleServer('${s.id}')">
+                    html += `<div class="server-card rounded-lg px-2 py-1.5 border border-transparent cursor-pointer ${sel ? 'selected' : ''}" style="padding-left:${depth * 12 + 8}px" onclick="toggleServer('${s.id}')" draggable="true" ondragstart="onDragStart(event,'${s.id}')">
                 <div class="flex items-center gap-2">
                     <div class="w-4 h-4 rounded border-[1.5px] flex items-center justify-center ${sel ? 'bg-brand-500 border-brand-500' : 'border-dark-500'}">
                         ${sel ? '<i class="fas fa-check t-primary text-[8px]"></i>' : ''}
                     </div>
                     <span class="text-xs font-mono t-primary flex-1 truncate">${s.host}<span class="t-muted">:${s.port}</span></span>
                     ${s.label ? `<span class="text-[10px] t-muted truncate max-w-[60px]">${esc(s.label)}</span>` : ''}
-                    <button data-test="${s.id}" onclick="event.stopPropagation();testConn('${s.id}')" class="p-0.5 rounded text-dark-600 hover:text-yellow-400 transition" title="测试">
+                    <button onclick="event.stopPropagation();editSingleServer('${s.id}')" class="p-0.5 rounded t-hint hover:text-amber-400 transition" title="编辑">
+                        <i class="fas fa-pen text-[10px]"></i>
+                    </button>
+                    <button data-test="${s.id}" onclick="event.stopPropagation();testConn('${s.id}')" class="p-0.5 rounded t-hint hover:text-yellow-400 transition" title="测试">
                         <i class="fas fa-bolt text-[10px]"></i>
                     </button>
-                    <button onclick="event.stopPropagation();deleteServer('${s.id}')" class="p-0.5 rounded text-dark-600 hover:text-red-400 transition" title="删除">
+                    <button onclick="event.stopPropagation();deleteServer('${s.id}')" class="p-0.5 rounded t-hint hover:text-red-400 transition" title="删除">
                         <i class="fas fa-trash text-[10px]"></i>
                     </button>
                 </div>
@@ -906,6 +1055,8 @@
             };
 
             renderGroup(null, 0);
+            // 未分组区域也接受拖放
+            html += `<div class="drop-zone-root rounded-lg py-2 mt-1 text-center text-[10px] t-hint" ondragover="event.preventDefault();this.style.background='rgba(99,102,241,0.1)'" ondragleave="this.style.background=''" ondrop="event.preventDefault();this.style.background='';dropToGroup(null,event)"><i class="fas fa-arrow-down mr-1"></i>拖到此处移出分组</div>`;
             el.innerHTML = html || '<div class="text-center t-muted text-xs py-12">暂无服务器</div>';
         }
 
