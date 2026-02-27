@@ -599,19 +599,37 @@
         </div>
     </div>
 
-    <!-- ===== 结果详情弹窗 ===== -->
+    <!-- ===== 结果详情弹窗（增强版） ===== -->
     <div id="detailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
         onclick="if(event.target===this)closeModal('detailModal')">
-        <div class="glass rounded-2xl p-5 w-[700px] max-h-[80vh] flex flex-col glow animate-fade">
+        <div class="glass rounded-2xl p-5 w-[800px] max-h-[85vh] flex flex-col glow animate-fade">
             <div class="flex items-center justify-between mb-3">
                 <h3 id="detailTitle" class="text-base font-bold t-primary"><i
                         class="fas fa-terminal text-brand-400 mr-2"></i>执行详情</h3>
-                <button onclick="closeModal('detailModal')"
-                    class="p-1.5 rounded-lg t-primary hover:text-brand-400 hover:t-bg-card transition"><i
-                        class="fas fa-times"></i></button>
+                <div class="flex items-center gap-2">
+                    <button onclick="copyDetailOutput()"
+                        class="text-xs px-3 py-1 rounded-lg t-bg-btn t-muted hover:text-brand-400 transition"
+                        title="复制全部输出">
+                        <i class="fas fa-copy mr-1"></i>复制
+                    </button>
+                    <button onclick="closeModal('detailModal')"
+                        class="p-1.5 rounded-lg t-muted hover:text-brand-400 hover:t-bg-card transition"><i
+                            class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <!-- 状态信息栏 -->
+            <div id="detailMeta" class="flex items-center gap-3 mb-3 text-xs"></div>
+            <!-- 输出标签页 -->
+            <div class="flex gap-1 mb-2">
+                <button id="tabStdout" onclick="switchDetailTab('stdout')"
+                    class="px-3 py-1 text-xs rounded-lg bg-brand-600 text-white transition">STDOUT</button>
+                <button id="tabStderr" onclick="switchDetailTab('stderr')"
+                    class="px-3 py-1 text-xs rounded-lg t-bg-btn t-muted hover:text-brand-400 transition">STDERR</button>
+                <button id="tabAll" onclick="switchDetailTab('all')"
+                    class="px-3 py-1 text-xs rounded-lg t-bg-btn t-muted hover:text-brand-400 transition">全部</button>
             </div>
             <pre id="detailOutput"
-                class="flex-1 overflow-auto code-editor rounded-xl p-4 border t-border text-sm whitespace-pre-wrap"></pre>
+                class="flex-1 overflow-auto code-editor rounded-xl p-4 border t-border text-sm whitespace-pre-wrap select-text"></pre>
         </div>
     </div>
 
@@ -1256,34 +1274,84 @@
 
             panel.innerHTML = task.results.map(r => {
                 const s = r.status === 'success';
-                const preview = (r.output || r.error || '').split('\n').filter(l => l.trim()).slice(0, 2).join('\n') || '(无输出)';
-                return `<div class="rounded-lg p-2.5 border animate-fade cursor-pointer
-            ${s ? 'border-green-900/30 bg-green-950/20 hover:bg-green-950/40' : 'border-red-900/30 bg-red-950/20 hover:bg-red-950/40'}"
-            onclick="showDetail('${r.host}:${r.port}', ${JSON.stringify(JSON.stringify(r.output || ''))}, ${JSON.stringify(JSON.stringify(r.error || ''))}, ${r.exit_code})">
-            <div class="flex items-center gap-2 mb-1">
-                <i class="fas ${s ? 'fa-check text-green-400' : 'fa-times text-red-400'} text-[10px]"></i>
-                <span class="text-xs font-mono t-primary">${r.host}<span class="t-muted">:${r.port}</span></span>
-                <span class="ml-auto text-[10px] t-muted">${r.duration}s</span>
+                const lines = (r.output || r.error || '').split('\n').filter(l => l.trim());
+                const preview = lines.slice(0, 4).join('\n') || '(无输出)';
+                const totalLines = lines.length;
+                const escapedOutput = JSON.stringify(r.output || '');
+                const escapedError = JSON.stringify(r.error || '');
+                return `<div class="rounded-xl p-3 border animate-fade cursor-pointer transition-all hover:scale-[1.01]
+            ${s ? 'border-green-500/20 bg-green-500/5 hover:bg-green-500/10' : 'border-red-500/20 bg-red-500/5 hover:bg-red-500/10'}"
+            onclick="showDetail('${r.host}', ${r.port}, ${escapedOutput}, ${escapedError}, ${r.exit_code}, ${r.duration})">
+            <div class="flex items-center gap-2 mb-1.5">
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${s ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                    <i class="fas ${s ? 'fa-check-circle' : 'fa-exclamation-circle'} text-[9px]"></i>${s ? '成功' : '失败'}
+                </span>
+                <span class="text-xs font-mono t-primary font-medium">${r.host}<span class="t-hint">:${r.port}</span></span>
+                <span class="ml-auto text-[10px] t-hint"><i class="fas fa-clock mr-0.5"></i>${r.duration}s</span>
             </div>
-            <pre class="text-[10px] t-muted font-mono truncate pl-5">${esc(preview)}</pre>
+            <pre class="text-[11px] t-muted font-mono pl-1 leading-relaxed overflow-hidden" style="max-height:4.5em">${esc(preview)}</pre>
+            ${totalLines > 4 ? `<div class="text-[10px] text-brand-400 mt-1 pl-1"><i class="fas fa-expand-alt mr-1"></i>还有 ${totalLines - 4} 行，点击查看全部</div>` : ''}
         </div>`;
             }).join('');
 
             if (wait > 0) {
-                panel.innerHTML += `<div class="rounded-lg p-2.5 border border-dark-700/30 t-bg-btn/30 flex items-center gap-2">
-            <i class="fas fa-spinner fa-spin text-[10px] text-yellow-400"></i><span class="text-xs t-primary">${wait} 台等待中...</span></div>`;
+                panel.innerHTML += `<div class="rounded-xl p-3 border border-yellow-500/20 bg-yellow-500/5 flex items-center gap-2">
+            <i class="fas fa-spinner fa-spin text-[10px] text-yellow-400"></i><span class="text-xs t-primary">${wait} 台执行中...</span></div>`;
             }
         }
 
-        function showDetail(title, output, error, exitCode) {
+        // 详情弹窗数据存储
+        let _detailData = { output: '', error: '', tab: 'stdout' };
+
+        function showDetail(host, port, output, error, exitCode, duration) {
+            _detailData = { output, error, tab: 'stdout' };
             document.getElementById('detailTitle').innerHTML =
-                `<i class="fas fa-terminal text-brand-400 mr-2"></i>${title}` +
-                `<span class="text-xs ml-2 px-1.5 py-0.5 rounded ${exitCode === 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">exit: ${exitCode}</span>`;
-            let c = '';
-            if (output) c += output;
-            if (error) c += '\n\n--- STDERR ---\n' + error;
-            document.getElementById('detailOutput').textContent = c || '(无输出)';
+                `<i class="fas fa-terminal text-brand-400 mr-2"></i>${host}<span class="t-hint">:${port}</span>`;
+            // 状态信息栏
+            const meta = document.getElementById('detailMeta');
+            const s = exitCode === 0;
+            const outputLines = (output || '').split('\n').filter(l => l.trim()).length;
+            const errorLines = (error || '').split('\n').filter(l => l.trim()).length;
+            meta.innerHTML = `
+                <span class="px-2 py-0.5 rounded-md font-medium ${s ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                    <i class="fas ${s ? 'fa-check-circle' : 'fa-times-circle'} mr-1"></i>Exit: ${exitCode}
+                </span>
+                <span class="t-hint"><i class="fas fa-clock mr-1"></i>${duration}s</span>
+                <span class="t-hint"><i class="fas fa-align-left mr-1"></i>输出 ${outputLines} 行</span>
+                ${errorLines > 0 ? `<span class="text-red-400"><i class="fas fa-exclamation-triangle mr-1"></i>错误 ${errorLines} 行</span>` : ''}
+            `;
+            switchDetailTab('stdout');
             showModal('detailModal');
+        }
+
+        function switchDetailTab(tab) {
+            _detailData.tab = tab;
+            const el = document.getElementById('detailOutput');
+            // 更新标签页样式
+            ['stdout', 'stderr', 'all'].forEach(t => {
+                const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (t === tab) {
+                    btn.className = 'px-3 py-1 text-xs rounded-lg bg-brand-600 text-white transition';
+                } else {
+                    btn.className = 'px-3 py-1 text-xs rounded-lg t-bg-btn t-muted hover:text-brand-400 transition';
+                }
+            });
+            // 切换内容
+            if (tab === 'stdout') {
+                el.textContent = _detailData.output || '(无输出)';
+            } else if (tab === 'stderr') {
+                el.textContent = _detailData.error || '(无错误输出)';
+            } else {
+                let c = '';
+                if (_detailData.output) c += _detailData.output;
+                if (_detailData.error) c += '\n\n━━━ STDERR ━━━\n' + _detailData.error;
+                el.textContent = c || '(无输出)';
+            }
+        }
+
+        function copyDetailOutput() {
+            const text = document.getElementById('detailOutput').textContent;
+            navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板'));
         }
     </script>
 </body>
