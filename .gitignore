@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+data/servers.json
+data/snippets.json
+data/groups.json
+*.pyc
+.DS_Store
