@@ -119,7 +119,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=$APP_DIR
-ExecStart=$APP_DIR/venv/bin/gunicorn --bind 127.0.0.1:$PORT --workers 4 --threads 2 --timeout 120 server:app
+ExecStart=$APP_DIR/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 4 --threads 2 --timeout 120 server:app
 Restart=always
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1

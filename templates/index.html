@@ -159,6 +159,10 @@
         <div class="flex items-center gap-4">
             <span id="serverCount" class="text-xs text-dark-400"><i
                     class="fas fa-circle text-green-500 text-[8px] mr-1"></i>0 台服务器</span>
+            <button onclick="openModal('pwdModal')" class="text-xs text-dark-400 hover:text-brand-400 transition-colors"
+                title="修改密码">
+                <i class="fas fa-key mr-1"></i>密码
+            </button>
             <button onclick="doLogout()" class="text-xs text-dark-400 hover:text-red-400 transition-colors"
                 title="退出登录">
                 <i class="fas fa-sign-out-alt mr-1"></i>退出
@@ -488,6 +492,29 @@
         </div>
     </div>
 
+    <!-- 修改密码弹窗 -->
+    <div id="pwdModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
+        onclick="if(event.target===this)closeModal('pwdModal')">
+        <div class="glass rounded-2xl p-5 w-96 glow animate-fade">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-white"><i class="fas fa-key text-brand-400 mr-2"></i>修改密码</h3>
+                <button onclick="closeModal('pwdModal')"
+                    class="p-1.5 rounded-lg text-dark-400 hover:text-white hover:bg-dark-700 transition"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-3">
+                <input type="password" id="oldPwd" placeholder="当前密码"
+                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-dark-500 focus:border-brand-500 focus:outline-none">
+                <input type="password" id="newPwd" placeholder="新密码（至少4位）"
+                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-dark-500 focus:border-brand-500 focus:outline-none">
+                <input type="password" id="newPwd2" placeholder="确认新密码"
+                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-dark-500 focus:border-brand-500 focus:outline-none">
+                <button onclick="changePassword()"
+                    class="w-full py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm rounded-lg transition">确认修改</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="fixed top-16 right-6 z-[100] hidden">
         <div class="glass rounded-xl px-4 py-2.5 animate-fade shadow-2xl flex items-center gap-2">
@@ -511,6 +538,33 @@
                 fetch('/api/logout', { method: 'POST' })
                     .then(() => window.location.href = '/login');
             }
+        }
+
+        // 修改密码
+        async function changePassword() {
+            const oldPwd = document.getElementById('oldPwd').value;
+            const newPwd = document.getElementById('newPwd').value;
+            const newPwd2 = document.getElementById('newPwd2').value;
+            if (!oldPwd || !newPwd) return showToast('请填写完整', 'error');
+            if (newPwd !== newPwd2) return showToast('两次密码不一致', 'error');
+            if (newPwd.length < 4) return showToast('新密码至少4位', 'error');
+            try {
+                const r = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ old_password: oldPwd, new_password: newPwd })
+                });
+                const d = await r.json();
+                if (r.ok) {
+                    showToast('密码修改成功');
+                    closeModal('pwdModal');
+                    document.getElementById('oldPwd').value = '';
+                    document.getElementById('newPwd').value = '';
+                    document.getElementById('newPwd2').value = '';
+                } else {
+                    showToast(d.error || '修改失败', 'error');
+                }
+            } catch { showToast('网络错误', 'error'); }
         }
 
         document.addEventListener('DOMContentLoaded', () => { loadAll(); });
