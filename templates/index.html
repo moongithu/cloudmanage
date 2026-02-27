@@ -36,19 +36,69 @@
         }
     </script>
     <style>
+        /* ===== 主题变量 ===== */
+        :root {
+            --bg-body: #0f172a;
+            --bg-panel: rgba(30, 41, 59, 0.7);
+            --bg-card: #1e293b;
+            --bg-input: #020617;
+            --bg-hover: rgba(99, 102, 241, 0.08);
+            --bg-selected: rgba(99, 102, 241, 0.15);
+            --bg-btn: #334155;
+            --border: rgba(100, 116, 139, 0.2);
+            --border-solid: #334155;
+            --text-primary: #ffffff;
+            --text-secondary: #e2e8f0;
+            --text-muted: #cbd5e1;
+            --text-hint: #94a3b8;
+            --scrollbar-track: rgba(15, 23, 42, 0.5);
+            --scrollbar-thumb: #475569;
+            --editor-bg: #020617;
+            --editor-text: #e2e8f0;
+            --editor-placeholder: #64748b;
+            --drop-border: #475569;
+            --shadow-glow: rgba(99, 102, 241, 0.15);
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f1f5f9;
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --bg-hover: rgba(99, 102, 241, 0.06);
+            --bg-selected: rgba(99, 102, 241, 0.1);
+            --bg-btn: #e2e8f0;
+            --border: rgba(148, 163, 184, 0.3);
+            --border-solid: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #1e293b;
+            --text-muted: #475569;
+            --text-hint: #64748b;
+            --scrollbar-track: #e2e8f0;
+            --scrollbar-thumb: #94a3b8;
+            --editor-bg: #f8fafc;
+            --editor-text: #1e293b;
+            --editor-placeholder: #94a3b8;
+            --drop-border: #94a3b8;
+            --shadow-glow: rgba(99, 102, 241, 0.1);
+        }
+
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background: #0f172a;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
         }
 
         .glass {
-            background: rgba(30, 41, 59, 0.7);
+            background: var(--bg-panel);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(100, 116, 139, 0.2);
+            border: 1px solid var(--border);
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .glow {
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+            box-shadow: 0 0 20px var(--shadow-glow);
         }
 
         ::-webkit-scrollbar {
@@ -57,11 +107,11 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
+            background: var(--scrollbar-track);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #475569;
+            background: var(--scrollbar-thumb);
             border-radius: 3px;
         }
 
@@ -71,8 +121,9 @@
             line-height: 1.6;
             tab-size: 4;
             resize: none;
-            background: #020617;
-            color: #e2e8f0;
+            background: var(--editor-bg);
+            color: var(--editor-text);
+            transition: background 0.3s, color 0.3s;
         }
 
         .code-editor:focus {
@@ -81,7 +132,7 @@
         }
 
         .code-editor::placeholder {
-            color: #475569;
+            color: var(--editor-placeholder);
         }
 
         @keyframes fadeIn {
@@ -105,11 +156,11 @@
         }
 
         .server-card:hover {
-            background: rgba(99, 102, 241, 0.08);
+            background: var(--bg-hover);
         }
 
         .server-card.selected {
-            background: rgba(99, 102, 241, 0.15);
+            background: var(--bg-selected);
             border-color: rgba(99, 102, 241, 0.5);
         }
 
@@ -127,11 +178,11 @@
         }
 
         .group-header:hover {
-            background: rgba(99, 102, 241, 0.06);
+            background: var(--bg-hover);
         }
 
         .drop-zone {
-            border: 2px dashed #475569;
+            border: 2px dashed var(--drop-border);
             transition: all 0.2s;
         }
 
@@ -139,32 +190,103 @@
             border-color: #6366f1;
             background: rgba(99, 102, 241, 0.08);
         }
+
+        /* 主题自适应颜色类 */
+        .t-primary {
+            color: var(--text-primary);
+        }
+
+        .t-secondary {
+            color: var(--text-secondary);
+        }
+
+        .t-muted {
+            color: var(--text-muted);
+        }
+
+        .t-hint {
+            color: var(--text-hint);
+        }
+
+        .t-bg-card {
+            background: var(--bg-card);
+        }
+
+        .t-bg-input {
+            background: var(--bg-input);
+        }
+
+        .t-bg-btn {
+            background: var(--bg-btn);
+        }
+
+        .t-border {
+            border-color: var(--border-solid);
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: relative;
+            width: 44px;
+            height: 22px;
+            border-radius: 11px;
+            cursor: pointer;
+            border: none;
+            background: #475569;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            background: #fbbf24;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] .theme-toggle {
+            background: #818cf8;
+        }
+
+        [data-theme="light"] .theme-toggle::after {
+            transform: translateX(22px);
+            background: #fff;
+        }
     </style>
 </head>
 
-<body class="min-h-screen text-gray-200">
+<body class="min-h-screen t-primary">
 
     <!-- 顶部导航 -->
     <header class="glass sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <div
                 class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg">
-                <i class="fas fa-server text-white text-sm"></i>
+                <i class="fas fa-server t-primary text-sm"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-white tracking-tight">Server Commander</h1>
-                <p class="text-xs text-slate-300">批量服务器管理</p>
+                <h1 class="text-lg font-bold t-primary tracking-tight">Server Commander</h1>
+                <p class="text-xs t-primary">批量服务器管理</p>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="serverCount" class="text-xs text-slate-300"><i
-                    class="fas fa-circle text-green-500 text-[8px] mr-1"></i>0 台服务器</span>
-            <button onclick="showModal('pwdModal')" class="text-xs text-slate-300 hover:text-brand-400 transition-colors"
+        <div class="flex items-center gap-3">
+            <span id="serverCount" class="text-xs t-muted"><i class="fas fa-circle text-green-500 text-[8px] mr-1"></i>0
+                台服务器</span>
+            <div class="flex items-center gap-1.5" title="切换主题">
+                <i class="fas fa-moon text-xs t-hint"></i>
+                <button class="theme-toggle" onclick="toggleTheme()"></button>
+                <i class="fas fa-sun text-xs t-hint"></i>
+            </div>
+            <button onclick="showModal('pwdModal')" class="text-xs t-muted hover:text-brand-400 transition-colors"
                 title="修改密码">
                 <i class="fas fa-key mr-1"></i>密码
             </button>
-            <button onclick="doLogout()" class="text-xs text-slate-300 hover:text-red-400 transition-colors"
-                title="退出登录">
+            <button onclick="doLogout()" class="text-xs t-muted hover:text-red-400 transition-colors" title="退出登录">
                 <i class="fas fa-sign-out-alt mr-1"></i>退出
             </button>
         </div>
@@ -174,57 +296,55 @@
     <main class="flex h-[calc(100vh-60px)]">
 
         <!-- ===== 左侧: 服务器树 ===== -->
-        <aside class="w-80 flex-shrink-0 border-r border-dark-700/50 flex flex-col">
-            <div class="p-3 border-b border-dark-700/50">
+        <aside class="w-80 flex-shrink-0 border-r t-border flex flex-col">
+            <div class="p-3 border-b t-border">
                 <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i
+                    <h2 class="text-xs font-bold t-primary uppercase tracking-wider"><i
                             class="fas fa-hdd mr-1.5 text-brand-400"></i>服务器</h2>
                     <div class="flex gap-0.5">
                         <button onclick="showCreateGroupModal()"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-dark-800 transition"
+                            class="p-1.5 rounded-lg t-muted hover:text-amber-400 hover:t-bg-btn transition"
                             title="新建分组">
                             <i class="fas fa-folder-plus text-xs"></i>
                         </button>
                         <button onclick="showImportModal()"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-brand-400 hover:bg-dark-800 transition"
-                            title="导入">
+                            class="p-1.5 rounded-lg t-muted hover:text-brand-400 hover:t-bg-btn transition" title="导入">
                             <i class="fas fa-file-import text-xs"></i>
                         </button>
                         <button onclick="showAddServerModal()"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-green-400 hover:bg-dark-800 transition"
-                            title="添加">
+                            class="p-1.5 rounded-lg t-muted hover:text-green-400 hover:t-bg-btn transition" title="添加">
                             <i class="fas fa-plus text-xs"></i>
                         </button>
                     </div>
                 </div>
                 <div class="flex gap-1.5">
                     <button onclick="selectAllServers()"
-                        class="flex-1 text-[11px] py-1 px-2 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition">全选</button>
+                        class="flex-1 text-[11px] py-1 px-2 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition">全选</button>
                     <button onclick="deselectAllServers()"
-                        class="flex-1 text-[11px] py-1 px-2 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition">取消</button>
+                        class="flex-1 text-[11px] py-1 px-2 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition">取消</button>
                 </div>
             </div>
             <div id="serverTree" class="flex-1 overflow-y-auto p-2 text-sm">
-                <div class="text-center text-slate-400 text-xs py-12"><i
+                <div class="text-center t-muted text-xs py-12"><i
                         class="fas fa-inbox text-2xl mb-2 block text-dark-600"></i>暂无服务器</div>
             </div>
         </aside>
 
         <!-- ===== 中间: 编辑区 ===== -->
         <section class="flex-1 flex flex-col min-w-0">
-            <div class="flex items-center border-b border-dark-700/50 px-4">
+            <div class="flex items-center border-b t-border px-4">
                 <button onclick="switchMode('command')" id="tab-command"
                     class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-brand-500 text-brand-400 transition"><i
                         class="fas fa-terminal mr-1.5"></i>命令</button>
                 <button onclick="switchMode('snippet')" id="tab-snippet"
-                    class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-300 hover:text-white transition"><i
+                    class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent t-primary hover:text-brand-400 transition"><i
                         class="fas fa-code mr-1.5"></i>代码片段</button>
                 <button onclick="switchMode('script')" id="tab-script"
-                    class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-300 hover:text-white transition"><i
+                    class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent t-primary hover:text-brand-400 transition"><i
                         class="fas fa-file-code mr-1.5"></i>脚本库</button>
                 <div class="flex-1"></div>
                 <button onclick="executeTask()" id="btnExecute"
-                    class="btn-glow px-5 py-1.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-lg">
+                    class="btn-glow px-5 py-1.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 t-primary text-sm font-bold rounded-xl transition-all duration-200 shadow-lg">
                     <i class="fas fa-play mr-1.5"></i>执行
                 </button>
             </div>
@@ -232,32 +352,31 @@
             <!-- 命令模式 -->
             <div id="mode-command" class="flex-1 flex flex-col">
                 <div class="p-4 flex-1 flex flex-col">
-                    <label class="text-xs text-slate-300 mb-2 font-medium">输入要执行的命令</label>
-                    <textarea id="commandInput"
-                        class="code-editor flex-1 w-full rounded-xl p-4 border border-dark-700/50"
+                    <label class="text-xs t-primary mb-2 font-medium">输入要执行的命令</label>
+                    <textarea id="commandInput" class="code-editor flex-1 w-full rounded-xl p-4 border t-border"
                         placeholder="hostname && uptime && df -h"></textarea>
                 </div>
                 {% raw %}<div class="px-4 pb-3">
-                    <p class="text-[11px] text-slate-400 mb-1.5">快捷命令:</p>
+                    <p class="text-[11px] t-muted mb-1.5">快捷命令:</p>
                     <div class="flex flex-wrap gap-1.5">
                         <button onclick="quickCmd('hostname && uptime')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition"><i
                                 class="fas fa-info-circle mr-1 text-blue-400"></i>主机</button>
                         <button onclick="quickCmd('df -h')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition"><i
                                 class="fas fa-hard-drive mr-1 text-yellow-400"></i>磁盘</button>
                         <button onclick="quickCmd('free -h')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition"><i
                                 class="fas fa-memory mr-1 text-green-400"></i>内存</button>
                         <button
                             onclick="quickCmd('docker ps --format &quot;table {{.Names}}\\t{{.Status}}\\t{{.Ports}}&quot;')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition"><i
                                 class="fab fa-docker mr-1 text-cyan-400"></i>Docker</button>
                         <button onclick="quickCmd('ss -tlnp')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition"><i
                                 class="fas fa-network-wired mr-1 text-purple-400"></i>端口</button>
                         <button onclick="quickCmd('cat /etc/os-release | head -5')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition"><i
                                 class="fab fa-linux mr-1 text-orange-400"></i>系统</button>
                     </div>
                 </div>{% endraw %}
@@ -267,20 +386,19 @@
             <div id="mode-snippet" class="flex-1 flex-col hidden">
                 <div class="p-4 flex-1 flex flex-col">
                     <div class="flex items-center justify-between mb-2">
-                        <label class="text-xs text-slate-300 font-medium">编写 Shell 代码片段</label>
+                        <label class="text-xs t-primary font-medium">编写 Shell 代码片段</label>
                         <div class="flex gap-1.5">
                             <button onclick="showSaveSnippetModal()"
-                                class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
+                                class="text-[11px] px-2.5 py-1 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition"><i
                                     class="fas fa-star mr-1 text-amber-400"></i>收藏</button>
                         </div>
                     </div>
-                    <textarea id="snippetInput"
-                        class="code-editor flex-1 w-full rounded-xl p-4 border border-dark-700/50"
+                    <textarea id="snippetInput" class="code-editor flex-1 w-full rounded-xl p-4 border t-border"
                         placeholder="#!/bin/bash&#10;echo &quot;Hello&quot;"></textarea>
                 </div>
                 <!-- 收藏列表 -->
                 <div class="px-4 pb-3 border-t border-dark-700/30">
-                    <p class="text-[11px] text-slate-400 my-2"><i class="fas fa-star text-amber-400 mr-1"></i>收藏片段:</p>
+                    <p class="text-[11px] t-muted my-2"><i class="fas fa-star text-amber-400 mr-1"></i>收藏片段:</p>
                     <div id="snippetList" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                         <span class="text-[11px] text-dark-600">暂无收藏</span>
                     </div>
@@ -291,10 +409,10 @@
             <div id="mode-script" class="flex-1 flex-col hidden">
                 <div class="p-4 flex-1 flex flex-col">
                     <div class="flex items-center justify-between mb-2">
-                        <label class="text-xs text-slate-300 font-medium">脚本库</label>
+                        <label class="text-xs t-primary font-medium">脚本库</label>
                         <div class="flex gap-1.5">
                             <button onclick="document.getElementById('scriptUpload').click()"
-                                class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
+                                class="text-[11px] px-2.5 py-1 rounded-md t-bg-btn hover:t-bg-card t-primary hover:text-brand-400 transition"><i
                                     class="fas fa-upload mr-1 text-blue-400"></i>上传脚本</button>
                             <input type="file" id="scriptUpload" class="hidden" accept=".sh,.py,.bash,.pl,.txt" multiple
                                 onchange="uploadScripts(this.files)">
@@ -306,27 +424,26 @@
                         ondragover="event.preventDefault();this.classList.add('dragover')"
                         ondragleave="this.classList.remove('dragover')"
                         ondrop="event.preventDefault();this.classList.remove('dragover');uploadScripts(event.dataTransfer.files)">
-                        <i class="fas fa-cloud-arrow-up text-slate-400 text-lg"></i>
-                        <p class="text-[11px] text-slate-400 mt-1">拖拽脚本文件到这里，或点击上传</p>
+                        <i class="fas fa-cloud-arrow-up t-muted text-lg"></i>
+                        <p class="text-[11px] t-muted mt-1">拖拽脚本文件到这里，或点击上传</p>
                     </div>
                     <div id="scriptList" class="space-y-1 mb-3 max-h-36 overflow-y-auto"></div>
-                    <label class="text-xs text-slate-300 mb-2 font-medium">脚本预览</label>
-                    <textarea id="scriptPreview"
-                        class="code-editor flex-1 w-full rounded-xl p-4 border border-dark-700/50" readonly
-                        placeholder="选择脚本以预览..."></textarea>
+                    <label class="text-xs t-primary mb-2 font-medium">脚本预览</label>
+                    <textarea id="scriptPreview" class="code-editor flex-1 w-full rounded-xl p-4 border t-border"
+                        readonly placeholder="选择脚本以预览..."></textarea>
                 </div>
             </div>
         </section>
 
         <!-- ===== 右侧: 结果 ===== -->
-        <aside class="w-96 flex-shrink-0 border-l border-dark-700/50 flex flex-col">
-            <div class="p-3 border-b border-dark-700/50 flex items-center justify-between">
-                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i
+        <aside class="w-96 flex-shrink-0 border-l t-border flex flex-col">
+            <div class="p-3 border-b t-border flex items-center justify-between">
+                <h2 class="text-xs font-bold t-primary uppercase tracking-wider"><i
                         class="fas fa-chart-bar mr-1.5 text-brand-400"></i>执行结果</h2>
-                <span id="resultSummary" class="text-xs text-slate-400"></span>
+                <span id="resultSummary" class="text-xs t-muted"></span>
             </div>
             <div id="resultPanel" class="flex-1 overflow-y-auto p-3 space-y-2">
-                <div class="text-center text-slate-400 text-xs py-12"><i
+                <div class="text-center t-muted text-xs py-12"><i
                         class="fas fa-rocket text-2xl mb-2 block text-dark-600"></i>选择服务器并执行任务</div>
             </div>
         </aside>
@@ -336,43 +453,43 @@
     <div id="addServerModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
         onclick="if(event.target===this)closeModal('addServerModal')">
         <div class="glass rounded-2xl p-5 w-[400px] glow animate-fade">
-            <h3 class="text-base font-bold text-white mb-3"><i class="fas fa-plus-circle text-green-400 mr-2"></i>添加服务器
+            <h3 class="text-base font-bold t-primary mb-3"><i class="fas fa-plus-circle text-green-400 mr-2"></i>添加服务器
             </h3>
             <div class="space-y-2.5">
                 <div class="flex gap-2.5">
                     <div class="flex-1">
-                        <label class="text-[11px] text-slate-300 mb-0.5 block">主机 IP</label>
+                        <label class="text-[11px] t-primary mb-0.5 block">主机 IP</label>
                         <input id="addHost" type="text" placeholder="192.168.1.1"
-                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                     <div class="w-20">
-                        <label class="text-[11px] text-slate-300 mb-0.5 block">端口</label>
+                        <label class="text-[11px] t-primary mb-0.5 block">端口</label>
                         <input id="addPort" type="number" value="22"
-                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                 </div>
                 <div class="flex gap-2.5">
                     <div class="flex-1">
-                        <label class="text-[11px] text-slate-300 mb-0.5 block">用户名</label>
+                        <label class="text-[11px] t-primary mb-0.5 block">用户名</label>
                         <input id="addUser" type="text" value="root"
-                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                     <div class="flex-1">
-                        <label class="text-[11px] text-slate-300 mb-0.5 block">密码</label>
+                        <label class="text-[11px] t-primary mb-0.5 block">密码</label>
                         <input id="addPass" type="password" placeholder="••••••"
-                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                 </div>
                 <div class="flex gap-2.5">
                     <div class="flex-1">
-                        <label class="text-[11px] text-slate-300 mb-0.5 block">标签 (可选)</label>
+                        <label class="text-[11px] t-primary mb-0.5 block">标签 (可选)</label>
                         <input id="addLabel" type="text" placeholder="Web-01"
-                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                     <div class="flex-1">
-                        <label class="text-[11px] text-slate-300 mb-0.5 block">分组</label>
+                        <label class="text-[11px] t-primary mb-0.5 block">分组</label>
                         <select id="addGroup"
-                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                            class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                             <option value="">未分组</option>
                         </select>
                     </div>
@@ -380,9 +497,9 @@
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button onclick="closeModal('addServerModal')"
-                    class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
+                    class="px-3 py-1.5 rounded-lg t-primary hover:text-brand-400 hover:t-bg-card text-sm transition">取消</button>
                 <button onclick="addServer()"
-                    class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-green-600 to-green-500 text-white text-sm font-bold transition shadow-lg"><i
+                    class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-green-600 to-green-500 t-primary text-sm font-bold transition shadow-lg"><i
                         class="fas fa-check mr-1"></i>添加</button>
             </div>
         </div>
@@ -392,27 +509,27 @@
     <div id="groupModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
         onclick="if(event.target===this)closeModal('groupModal')">
         <div class="glass rounded-2xl p-5 w-[360px] glow animate-fade">
-            <h3 class="text-base font-bold text-white mb-3"><i class="fas fa-folder-plus text-amber-400 mr-2"></i>新建分组
+            <h3 class="text-base font-bold t-primary mb-3"><i class="fas fa-folder-plus text-amber-400 mr-2"></i>新建分组
             </h3>
             <div class="space-y-2.5">
                 <div>
-                    <label class="text-[11px] text-slate-300 mb-0.5 block">分组名称</label>
+                    <label class="text-[11px] t-primary mb-0.5 block">分组名称</label>
                     <input id="groupName" type="text" placeholder="例: 生产环境"
-                        class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                        class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="text-[11px] text-slate-300 mb-0.5 block">父级分组</label>
+                    <label class="text-[11px] t-primary mb-0.5 block">父级分组</label>
                     <select id="groupParent"
-                        class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                        class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                         <option value="">顶层</option>
                     </select>
                 </div>
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button onclick="closeModal('groupModal')"
-                    class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
+                    class="px-3 py-1.5 rounded-lg t-primary hover:text-brand-400 hover:t-bg-card text-sm transition">取消</button>
                 <button onclick="createGroup()"
-                    class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white text-sm font-bold transition shadow-lg"><i
+                    class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 t-primary text-sm font-bold transition shadow-lg"><i
                         class="fas fa-check mr-1"></i>创建</button>
             </div>
         </div>
@@ -422,34 +539,34 @@
     <div id="importModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
         onclick="if(event.target===this)closeModal('importModal')">
         <div class="glass rounded-2xl p-5 w-[460px] glow animate-fade">
-            <h3 class="text-base font-bold text-white mb-3"><i class="fas fa-file-import text-brand-400 mr-2"></i>导入服务器
+            <h3 class="text-base font-bold t-primary mb-3"><i class="fas fa-file-import text-brand-400 mr-2"></i>导入服务器
             </h3>
             <div class="space-y-2.5">
                 <button onclick="importFromFile()"
-                    class="w-full text-left px-3 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-700 transition group">
-                    <div class="text-sm font-medium text-white group-hover:text-brand-400"><i
+                    class="w-full text-left px-3 py-2.5 rounded-xl t-bg-btn hover:t-bg-card transition group">
+                    <div class="text-sm font-medium t-primary group-hover:text-brand-400"><i
                             class="fas fa-file-alt mr-2 text-brand-400"></i>从 serverInfo 文件导入</div>
-                    <div class="text-[11px] text-slate-400 mt-0.5 ml-6">自动读取同目录下的 serverInfo 文件</div>
+                    <div class="text-[11px] t-muted mt-0.5 ml-6">自动读取同目录下的 serverInfo 文件</div>
                 </button>
                 <div>
-                    <p class="text-[11px] text-slate-300 mb-1.5">或粘贴 (<span class="text-brand-400 font-mono">IP 端口 用户
+                    <p class="text-[11px] t-primary mb-1.5">或粘贴 (<span class="text-brand-400 font-mono">IP 端口 用户
                             密码</span>)</p>
-                    <textarea id="importText" class="code-editor w-full h-24 rounded-xl p-3 border border-dark-700/50"
+                    <textarea id="importText" class="code-editor w-full h-24 rounded-xl p-3 border t-border"
                         placeholder="1.1.1.1 22 root pwd123"></textarea>
                 </div>
                 <div>
-                    <label class="text-[11px] text-slate-300 mb-0.5 block">导入到分组</label>
+                    <label class="text-[11px] t-primary mb-0.5 block">导入到分组</label>
                     <select id="importGroup"
-                        class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                        class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm focus:border-brand-500 focus:outline-none">
                         <option value="">未分组</option>
                     </select>
                 </div>
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button onclick="closeModal('importModal')"
-                    class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
+                    class="px-3 py-1.5 rounded-lg t-primary hover:text-brand-400 hover:t-bg-card text-sm transition">取消</button>
                 <button onclick="importFromText()"
-                    class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 text-white text-sm font-bold transition shadow-lg"><i
+                    class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 t-primary text-sm font-bold transition shadow-lg"><i
                         class="fas fa-download mr-1"></i>导入</button>
             </div>
         </div>
@@ -460,17 +577,17 @@
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
         onclick="if(event.target===this)closeModal('saveSnippetModal')">
         <div class="glass rounded-2xl p-5 w-[360px] glow animate-fade">
-            <h3 class="text-base font-bold text-white mb-3"><i class="fas fa-star text-amber-400 mr-2"></i>收藏代码片段</h3>
+            <h3 class="text-base font-bold t-primary mb-3"><i class="fas fa-star text-amber-400 mr-2"></i>收藏代码片段</h3>
             <div>
-                <label class="text-[11px] text-slate-300 mb-0.5 block">片段名称</label>
+                <label class="text-[11px] t-primary mb-0.5 block">片段名称</label>
                 <input id="snippetName" type="text" placeholder="例: 检查磁盘"
-                    class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm font-mono focus:border-brand-500 focus:outline-none">
+                    class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 t-primary text-sm font-mono focus:border-brand-500 focus:outline-none">
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button onclick="closeModal('saveSnippetModal')"
-                    class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
+                    class="px-3 py-1.5 rounded-lg t-primary hover:text-brand-400 hover:t-bg-card text-sm transition">取消</button>
                 <button onclick="doSaveSnippet()"
-                    class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white text-sm font-bold transition shadow-lg"><i
+                    class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 t-primary text-sm font-bold transition shadow-lg"><i
                         class="fas fa-star mr-1"></i>收藏</button>
             </div>
         </div>
@@ -481,14 +598,14 @@
         onclick="if(event.target===this)closeModal('detailModal')">
         <div class="glass rounded-2xl p-5 w-[700px] max-h-[80vh] flex flex-col glow animate-fade">
             <div class="flex items-center justify-between mb-3">
-                <h3 id="detailTitle" class="text-base font-bold text-white"><i
+                <h3 id="detailTitle" class="text-base font-bold t-primary"><i
                         class="fas fa-terminal text-brand-400 mr-2"></i>执行详情</h3>
                 <button onclick="closeModal('detailModal')"
-                    class="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 transition"><i
+                    class="p-1.5 rounded-lg t-primary hover:text-brand-400 hover:t-bg-card transition"><i
                         class="fas fa-times"></i></button>
             </div>
             <pre id="detailOutput"
-                class="flex-1 overflow-auto code-editor rounded-xl p-4 border border-dark-700/50 text-sm whitespace-pre-wrap"></pre>
+                class="flex-1 overflow-auto code-editor rounded-xl p-4 border t-border text-sm whitespace-pre-wrap"></pre>
         </div>
     </div>
 
@@ -497,20 +614,20 @@
         onclick="if(event.target===this)closeModal('pwdModal')">
         <div class="glass rounded-2xl p-5 w-96 glow animate-fade">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-bold text-white"><i class="fas fa-key text-brand-400 mr-2"></i>修改密码</h3>
+                <h3 class="text-base font-bold t-primary"><i class="fas fa-key text-brand-400 mr-2"></i>修改密码</h3>
                 <button onclick="closeModal('pwdModal')"
-                    class="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 transition"><i
+                    class="p-1.5 rounded-lg t-primary hover:text-brand-400 hover:t-bg-card transition"><i
                         class="fas fa-times"></i></button>
             </div>
             <div class="space-y-3">
                 <input type="password" id="oldPwd" placeholder="当前密码"
-                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none">
+                    class="w-full px-3 py-2 t-bg-input border t-border rounded-lg text-sm t-primary placeholder-slate-500 focus:border-brand-500 focus:outline-none">
                 <input type="password" id="newPwd" placeholder="新密码（至少4位）"
-                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none">
+                    class="w-full px-3 py-2 t-bg-input border t-border rounded-lg text-sm t-primary placeholder-slate-500 focus:border-brand-500 focus:outline-none">
                 <input type="password" id="newPwd2" placeholder="确认新密码"
-                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none">
+                    class="w-full px-3 py-2 t-bg-input border t-border rounded-lg text-sm t-primary placeholder-slate-500 focus:border-brand-500 focus:outline-none">
                 <button onclick="changePassword()"
-                    class="w-full py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm rounded-lg transition">确认修改</button>
+                    class="w-full py-2 bg-brand-600 hover:bg-brand-500 t-primary text-sm rounded-lg transition">确认修改</button>
             </div>
         </div>
     </div>
@@ -519,7 +636,7 @@
     <div id="toast" class="fixed top-16 right-6 z-[100] hidden">
         <div class="glass rounded-xl px-4 py-2.5 animate-fade shadow-2xl flex items-center gap-2">
             <i id="toastIcon" class="fas fa-check-circle text-green-400"></i>
-            <span id="toastMsg" class="text-sm text-white"></span>
+            <span id="toastMsg" class="text-sm t-primary"></span>
         </div>
     </div>
 
@@ -531,6 +648,20 @@
         let selectedIds = new Set();
         let collapsedGroups = new Set();
         let currentMode = 'command', currentScript = '', pollingTimer = null;
+
+        // 主题切换
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+        // 初始化主题
+        (function () {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
 
         // 退出登录
         function doLogout() {
@@ -722,7 +853,7 @@
         function renderTree() {
             const el = document.getElementById('serverTree');
             if (!servers.length && !groups.length) {
-                el.innerHTML = '<div class="text-center text-slate-400 text-xs py-12"><i class="fas fa-inbox text-2xl mb-2 block text-dark-600"></i>暂无服务器</div>';
+                el.innerHTML = '<div class="text-center t-muted text-xs py-12"><i class="fas fa-inbox text-2xl mb-2 block text-dark-600"></i>暂无服务器</div>';
                 return;
             }
 
@@ -737,7 +868,7 @@
                     const groupServerCount = countGroupServers(g.id);
                     html += `<div class="mb-0.5" style="padding-left:${depth * 12}px">
                 <div class="group-header flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer" onclick="toggleGroup('${g.id}')">
-                    <i class="fas fa-chevron-${collapsed ? 'right' : 'down'} text-[9px] text-slate-400 w-3"></i>
+                    <i class="fas fa-chevron-${collapsed ? 'right' : 'down'} text-[9px] t-muted w-3"></i>
                     <i class="fas fa-folder${collapsed ? '' : '-open'} text-xs text-amber-400/80"></i>
                     <span class="text-xs font-medium text-dark-300 flex-1">${esc(g.name)}</span>
                     <span class="text-[10px] text-dark-600">${groupServerCount}</span>
@@ -759,10 +890,10 @@
                     html += `<div class="server-card rounded-lg px-2 py-1.5 border border-transparent cursor-pointer ${sel ? 'selected' : ''}" style="padding-left:${depth * 12 + 8}px" onclick="toggleServer('${s.id}')">
                 <div class="flex items-center gap-2">
                     <div class="w-4 h-4 rounded border-[1.5px] flex items-center justify-center ${sel ? 'bg-brand-500 border-brand-500' : 'border-dark-500'}">
-                        ${sel ? '<i class="fas fa-check text-white text-[8px]"></i>' : ''}
+                        ${sel ? '<i class="fas fa-check t-primary text-[8px]"></i>' : ''}
                     </div>
-                    <span class="text-xs font-mono text-white flex-1 truncate">${s.host}<span class="text-slate-400">:${s.port}</span></span>
-                    ${s.label ? `<span class="text-[10px] text-slate-400 truncate max-w-[60px]">${esc(s.label)}</span>` : ''}
+                    <span class="text-xs font-mono t-primary flex-1 truncate">${s.host}<span class="t-muted">:${s.port}</span></span>
+                    ${s.label ? `<span class="text-[10px] t-muted truncate max-w-[60px]">${esc(s.label)}</span>` : ''}
                     <button data-test="${s.id}" onclick="event.stopPropagation();testConn('${s.id}')" class="p-0.5 rounded text-dark-600 hover:text-yellow-400 transition" title="测试">
                         <i class="fas fa-bolt text-[10px]"></i>
                     </button>
@@ -775,7 +906,7 @@
             };
 
             renderGroup(null, 0);
-            el.innerHTML = html || '<div class="text-center text-slate-400 text-xs py-12">暂无服务器</div>';
+            el.innerHTML = html || '<div class="text-center t-muted text-xs py-12">暂无服务器</div>';
         }
 
         function countGroupServers(gid) {
@@ -798,7 +929,7 @@
                 tab.classList.toggle('border-brand-500', m === mode);
                 tab.classList.toggle('text-brand-400', m === mode);
                 tab.classList.toggle('border-transparent', m !== mode);
-                tab.classList.toggle('text-slate-300', m !== mode);
+                tab.classList.toggle('t-primary', m !== mode);
             });
             if (mode === 'script') loadScripts();
             if (mode === 'snippet') renderSnippets();
@@ -818,9 +949,9 @@
             const el = document.getElementById('snippetList');
             if (!snippets.length) { el.innerHTML = '<span class="text-[11px] text-dark-600">暂无收藏</span>'; return; }
             el.innerHTML = snippets.map(s => `
-        <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-dark-800 hover:bg-dark-700 cursor-pointer transition group" onclick="loadSnippet('${esc(s.name)}')">
+        <div class="flex items-center gap-1 px-2 py-1 rounded-lg t-bg-btn hover:t-bg-card cursor-pointer transition group" onclick="loadSnippet('${esc(s.name)}')">
             <i class="fas fa-star text-[9px] text-amber-400"></i>
-            <span class="text-[11px] text-dark-300 group-hover:text-white">${esc(s.name)}</span>
+            <span class="text-[11px] text-dark-300 group-hover:text-brand-400">${esc(s.name)}</span>
             <button onclick="event.stopPropagation();deleteSnippet('${s.id}')" class="ml-0.5 p-0.5 rounded text-dark-600 hover:text-red-400 transition opacity-0 group-hover:opacity-100"><i class="fas fa-times text-[9px]"></i></button>
         </div>
     `).join('');
@@ -871,11 +1002,11 @@
             if (!scripts.length) { el.innerHTML = '<div class="text-center text-dark-600 text-[11px] py-3">脚本库为空</div>'; return; }
             el.innerHTML = scripts.map(s => `
         <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition group
-            ${currentScript === s.name ? 'bg-brand-500/15 border border-brand-500/30' : 'hover:bg-dark-800 border border-transparent'}"
+            ${currentScript === s.name ? 'bg-brand-500/15 border border-brand-500/30' : 'hover:t-bg-btn border border-transparent'}"
             onclick="selectScript('${esc(s.name)}')">
-            <i class="fas fa-file-code text-xs ${currentScript === s.name ? 'text-brand-400' : 'text-slate-400'}"></i>
+            <i class="fas fa-file-code text-xs ${currentScript === s.name ? 'text-brand-400' : 't-muted'}"></i>
             <div class="flex-1 min-w-0">
-                <div class="text-xs font-mono ${currentScript === s.name ? 'text-brand-300' : 'text-white'}">${s.name}</div>
+                <div class="text-xs font-mono ${currentScript === s.name ? 'text-brand-300' : 't-primary'}">${s.name}</div>
                 <div class="text-[10px] text-dark-600">${(s.size / 1024).toFixed(1)} KB</div>
             </div>
             <button onclick="event.stopPropagation();deleteScriptFile('${esc(s.name)}')" class="p-0.5 rounded text-dark-600 hover:text-red-400 transition opacity-0 group-hover:opacity-100" title="删除">
@@ -944,7 +1075,7 @@
         function resetBtn() { const b = document.getElementById('btnExecute'); b.disabled = false; b.innerHTML = '<i class="fas fa-play mr-1.5"></i>执行'; b.classList.remove('opacity-70'); }
 
         function startPolling(taskId) {
-            document.getElementById('resultPanel').innerHTML = '<div class="text-center py-10 animate-fade"><i class="fas fa-spinner fa-spin text-2xl text-brand-400 mb-3 block"></i><p class="text-xs text-slate-300">执行中...</p></div>';
+            document.getElementById('resultPanel').innerHTML = '<div class="text-center py-10 animate-fade"><i class="fas fa-spinner fa-spin text-2xl text-brand-400 mb-3 block"></i><p class="text-xs t-primary">执行中...</p></div>';
             document.getElementById('resultSummary').textContent = '运行中...';
             if (pollingTimer) clearInterval(pollingTimer);
             pollingTimer = setInterval(async () => {
@@ -980,16 +1111,16 @@
             onclick="showDetail('${r.host}:${r.port}', ${JSON.stringify(JSON.stringify(r.output || ''))}, ${JSON.stringify(JSON.stringify(r.error || ''))}, ${r.exit_code})">
             <div class="flex items-center gap-2 mb-1">
                 <i class="fas ${s ? 'fa-check text-green-400' : 'fa-times text-red-400'} text-[10px]"></i>
-                <span class="text-xs font-mono text-white">${r.host}<span class="text-slate-400">:${r.port}</span></span>
-                <span class="ml-auto text-[10px] text-slate-400">${r.duration}s</span>
+                <span class="text-xs font-mono t-primary">${r.host}<span class="t-muted">:${r.port}</span></span>
+                <span class="ml-auto text-[10px] t-muted">${r.duration}s</span>
             </div>
-            <pre class="text-[10px] text-slate-400 font-mono truncate pl-5">${esc(preview)}</pre>
+            <pre class="text-[10px] t-muted font-mono truncate pl-5">${esc(preview)}</pre>
         </div>`;
             }).join('');
 
             if (wait > 0) {
-                panel.innerHTML += `<div class="rounded-lg p-2.5 border border-dark-700/30 bg-dark-800/30 flex items-center gap-2">
-            <i class="fas fa-spinner fa-spin text-[10px] text-yellow-400"></i><span class="text-xs text-slate-300">${wait} 台等待中...</span></div>`;
+                panel.innerHTML += `<div class="rounded-lg p-2.5 border border-dark-700/30 t-bg-btn/30 flex items-center gap-2">
+            <i class="fas fa-spinner fa-spin text-[10px] text-yellow-400"></i><span class="text-xs t-primary">${wait} 台等待中...</span></div>`;
             }
         }
 
