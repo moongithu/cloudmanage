@@ -8,11 +8,13 @@ import os
 import json
 import uuid
 import time
+import hashlib
 import threading
 from datetime import datetime
 from pathlib import Path
+from functools import wraps
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import paramiko
 
 # ===========================
@@ -23,6 +25,7 @@ DATA_DIR = BASE_DIR / "data"
 SERVERS_FILE = DATA_DIR / "servers.json"
 GROUPS_FILE = DATA_DIR / "groups.json"
 SNIPPETS_FILE = DATA_DIR / "snippets.json"
+AUTH_FILE = DATA_DIR / "auth.json"
 SCRIPTS_DIR = DATA_DIR / "scripts"
 SERVERINFO_FILE = BASE_DIR / "serverInfo"
 
@@ -30,7 +33,85 @@ DATA_DIR.mkdir(exist_ok=True)
 SCRIPTS_DIR.mkdir(exist_ok=True)
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB 上传限制
+app.secret_key = os.environ.get('SECRET_KEY', uuid.uuid4().hex)
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+
+# ===========================
+# 认证系统
+# ===========================
+DEFAULT_USER = 'admin'
+DEFAULT_PASS = 'admin123'
+
+def get_auth():
+    """读取认证配置，首次运行自动创建默认账号"""
+    if AUTH_FILE.exists():
+        with open(AUTH_FILE, 'r') as f:
+            return json.load(f)
+    auth = {
+        'username': os.environ.get('CM_USER', DEFAULT_USER),
+        'password_hash': hashlib.sha256(
+            os.environ.get('CM_PASS', DEFAULT_PASS).encode()
+        ).hexdigest()
+    }
+    save_json(AUTH_FILE, auth)
+    return auth
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('logged_in'):
+            if request.is_json or request.path.startswith('/api/'):
+                return jsonify({'error': '未登录'}), 401
+            return redirect(url_for('login_page'))
+        return f(*args, **kwargs)
+    return decorated
+
+@app.before_request
+def check_auth():
+    """拦截所有请求（登录页和静态资源除外）"""
+    open_paths = ['/login', '/api/login', '/static']
+    if any(request.path.startswith(p) for p in open_paths):
+        return
+    if not session.get('logged_in'):
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({'error': '未登录'}), 401
+        return redirect(url_for('login_page'))
+
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
+
+@app.route('/api/login', methods=['POST'])
+def do_login():
+    data = request.json
+    username = data.get('username', '')
+    password = data.get('password', '')
+    auth = get_auth()
+    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+    if username == auth['username'] and pwd_hash == auth['password_hash']:
+        session['logged_in'] = True
+        session['username'] = username
+        return jsonify({'message': '登录成功'})
+    return jsonify({'error': '用户名或密码错误'}), 401
+
+@app.route('/api/logout', methods=['POST'])
+def do_logout():
+    session.clear()
+    return jsonify({'message': '已退出'})
+
+@app.route('/api/change-password', methods=['POST'])
+def change_password():
+    data = request.json
+    old_pwd = data.get('old_password', '')
+    new_pwd = data.get('new_password', '')
+    auth = get_auth()
+    if hashlib.sha256(old_pwd.encode()).hexdigest() != auth['password_hash']:
+        return jsonify({'error': '原密码错误'}), 400
+    if len(new_pwd) < 4:
+        return jsonify({'error': '新密码至少4位'}), 400
+    auth['password_hash'] = hashlib.sha256(new_pwd.encode()).hexdigest()
+    save_json(AUTH_FILE, auth)
+    return jsonify({'message': '密码已修改'})
 
 # ===========================
 # 任务结果存储（内存）

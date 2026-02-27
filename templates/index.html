@@ -156,8 +156,14 @@
                 <p class="text-xs text-dark-400">批量服务器管理</p>
             </div>
         </div>
-        <span id="serverCount" class="text-xs text-dark-400"><i
-                class="fas fa-circle text-green-500 text-[8px] mr-1"></i>0 台服务器</span>
+        <div class="flex items-center gap-4">
+            <span id="serverCount" class="text-xs text-dark-400"><i
+                    class="fas fa-circle text-green-500 text-[8px] mr-1"></i>0 台服务器</span>
+            <button onclick="doLogout()" class="text-xs text-dark-400 hover:text-red-400 transition-colors"
+                title="退出登录">
+                <i class="fas fa-sign-out-alt mr-1"></i>退出
+            </button>
+        </div>
     </header>
 
     <!-- 主体 -->
@@ -498,6 +504,14 @@
         let selectedIds = new Set();
         let collapsedGroups = new Set();
         let currentMode = 'command', currentScript = '', pollingTimer = null;
+
+        // 退出登录
+        function doLogout() {
+            if (confirm('确定退出登录？')) {
+                fetch('/api/logout', { method: 'POST' })
+                    .then(() => window.location.href = '/login');
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => { loadAll(); });
 
