@@ -153,17 +153,17 @@
             </div>
             <div>
                 <h1 class="text-lg font-bold text-white tracking-tight">Server Commander</h1>
-                <p class="text-xs text-dark-400">批量服务器管理</p>
+                <p class="text-xs text-slate-300">批量服务器管理</p>
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <span id="serverCount" class="text-xs text-dark-400"><i
+            <span id="serverCount" class="text-xs text-slate-300"><i
                     class="fas fa-circle text-green-500 text-[8px] mr-1"></i>0 台服务器</span>
-            <button onclick="showModal('pwdModal')" class="text-xs text-dark-400 hover:text-brand-400 transition-colors"
+            <button onclick="showModal('pwdModal')" class="text-xs text-slate-300 hover:text-brand-400 transition-colors"
                 title="修改密码">
                 <i class="fas fa-key mr-1"></i>密码
             </button>
-            <button onclick="doLogout()" class="text-xs text-dark-400 hover:text-red-400 transition-colors"
+            <button onclick="doLogout()" class="text-xs text-slate-300 hover:text-red-400 transition-colors"
                 title="退出登录">
                 <i class="fas fa-sign-out-alt mr-1"></i>退出
             </button>
@@ -177,21 +177,21 @@
         <aside class="w-80 flex-shrink-0 border-r border-dark-700/50 flex flex-col">
             <div class="p-3 border-b border-dark-700/50">
                 <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-xs font-bold text-dark-400 uppercase tracking-wider"><i
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i
                             class="fas fa-hdd mr-1.5 text-brand-400"></i>服务器</h2>
                     <div class="flex gap-0.5">
                         <button onclick="showCreateGroupModal()"
-                            class="p-1.5 rounded-lg text-dark-500 hover:text-amber-400 hover:bg-dark-800 transition"
+                            class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-dark-800 transition"
                             title="新建分组">
                             <i class="fas fa-folder-plus text-xs"></i>
                         </button>
                         <button onclick="showImportModal()"
-                            class="p-1.5 rounded-lg text-dark-500 hover:text-brand-400 hover:bg-dark-800 transition"
+                            class="p-1.5 rounded-lg text-slate-400 hover:text-brand-400 hover:bg-dark-800 transition"
                             title="导入">
                             <i class="fas fa-file-import text-xs"></i>
                         </button>
                         <button onclick="showAddServerModal()"
-                            class="p-1.5 rounded-lg text-dark-500 hover:text-green-400 hover:bg-dark-800 transition"
+                            class="p-1.5 rounded-lg text-slate-400 hover:text-green-400 hover:bg-dark-800 transition"
                             title="添加">
                             <i class="fas fa-plus text-xs"></i>
                         </button>
@@ -199,13 +199,13 @@
                 </div>
                 <div class="flex gap-1.5">
                     <button onclick="selectAllServers()"
-                        class="flex-1 text-[11px] py-1 px-2 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition">全选</button>
+                        class="flex-1 text-[11px] py-1 px-2 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition">全选</button>
                     <button onclick="deselectAllServers()"
-                        class="flex-1 text-[11px] py-1 px-2 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition">取消</button>
+                        class="flex-1 text-[11px] py-1 px-2 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition">取消</button>
                 </div>
             </div>
             <div id="serverTree" class="flex-1 overflow-y-auto p-2 text-sm">
-                <div class="text-center text-dark-500 text-xs py-12"><i
+                <div class="text-center text-slate-400 text-xs py-12"><i
                         class="fas fa-inbox text-2xl mb-2 block text-dark-600"></i>暂无服务器</div>
             </div>
         </aside>
@@ -217,10 +217,10 @@
                     class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-brand-500 text-brand-400 transition"><i
                         class="fas fa-terminal mr-1.5"></i>命令</button>
                 <button onclick="switchMode('snippet')" id="tab-snippet"
-                    class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-dark-400 hover:text-dark-200 transition"><i
+                    class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-300 hover:text-white transition"><i
                         class="fas fa-code mr-1.5"></i>代码片段</button>
                 <button onclick="switchMode('script')" id="tab-script"
-                    class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-dark-400 hover:text-dark-200 transition"><i
+                    class="mode-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-300 hover:text-white transition"><i
                         class="fas fa-file-code mr-1.5"></i>脚本库</button>
                 <div class="flex-1"></div>
                 <button onclick="executeTask()" id="btnExecute"
@@ -232,32 +232,32 @@
             <!-- 命令模式 -->
             <div id="mode-command" class="flex-1 flex flex-col">
                 <div class="p-4 flex-1 flex flex-col">
-                    <label class="text-xs text-dark-400 mb-2 font-medium">输入要执行的命令</label>
+                    <label class="text-xs text-slate-300 mb-2 font-medium">输入要执行的命令</label>
                     <textarea id="commandInput"
                         class="code-editor flex-1 w-full rounded-xl p-4 border border-dark-700/50"
                         placeholder="hostname && uptime && df -h"></textarea>
                 </div>
                 {% raw %}<div class="px-4 pb-3">
-                    <p class="text-[11px] text-dark-500 mb-1.5">快捷命令:</p>
+                    <p class="text-[11px] text-slate-400 mb-1.5">快捷命令:</p>
                     <div class="flex flex-wrap gap-1.5">
                         <button onclick="quickCmd('hostname && uptime')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
                                 class="fas fa-info-circle mr-1 text-blue-400"></i>主机</button>
                         <button onclick="quickCmd('df -h')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
                                 class="fas fa-hard-drive mr-1 text-yellow-400"></i>磁盘</button>
                         <button onclick="quickCmd('free -h')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
                                 class="fas fa-memory mr-1 text-green-400"></i>内存</button>
                         <button
                             onclick="quickCmd('docker ps --format &quot;table {{.Names}}\\t{{.Status}}\\t{{.Ports}}&quot;')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
                                 class="fab fa-docker mr-1 text-cyan-400"></i>Docker</button>
                         <button onclick="quickCmd('ss -tlnp')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
                                 class="fas fa-network-wired mr-1 text-purple-400"></i>端口</button>
                         <button onclick="quickCmd('cat /etc/os-release | head -5')"
-                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition"><i
+                            class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
                                 class="fab fa-linux mr-1 text-orange-400"></i>系统</button>
                     </div>
                 </div>{% endraw %}
@@ -267,10 +267,10 @@
             <div id="mode-snippet" class="flex-1 flex-col hidden">
                 <div class="p-4 flex-1 flex flex-col">
                     <div class="flex items-center justify-between mb-2">
-                        <label class="text-xs text-dark-400 font-medium">编写 Shell 代码片段</label>
+                        <label class="text-xs text-slate-300 font-medium">编写 Shell 代码片段</label>
                         <div class="flex gap-1.5">
                             <button onclick="showSaveSnippetModal()"
-                                class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition"><i
+                                class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
                                     class="fas fa-star mr-1 text-amber-400"></i>收藏</button>
                         </div>
                     </div>
@@ -280,7 +280,7 @@
                 </div>
                 <!-- 收藏列表 -->
                 <div class="px-4 pb-3 border-t border-dark-700/30">
-                    <p class="text-[11px] text-dark-500 my-2"><i class="fas fa-star text-amber-400 mr-1"></i>收藏片段:</p>
+                    <p class="text-[11px] text-slate-400 my-2"><i class="fas fa-star text-amber-400 mr-1"></i>收藏片段:</p>
                     <div id="snippetList" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                         <span class="text-[11px] text-dark-600">暂无收藏</span>
                     </div>
@@ -291,10 +291,10 @@
             <div id="mode-script" class="flex-1 flex-col hidden">
                 <div class="p-4 flex-1 flex flex-col">
                     <div class="flex items-center justify-between mb-2">
-                        <label class="text-xs text-dark-400 font-medium">脚本库</label>
+                        <label class="text-xs text-slate-300 font-medium">脚本库</label>
                         <div class="flex gap-1.5">
                             <button onclick="document.getElementById('scriptUpload').click()"
-                                class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition"><i
+                                class="text-[11px] px-2.5 py-1 rounded-md bg-dark-800 hover:bg-dark-700 text-slate-300 hover:text-white transition"><i
                                     class="fas fa-upload mr-1 text-blue-400"></i>上传脚本</button>
                             <input type="file" id="scriptUpload" class="hidden" accept=".sh,.py,.bash,.pl,.txt" multiple
                                 onchange="uploadScripts(this.files)">
@@ -306,11 +306,11 @@
                         ondragover="event.preventDefault();this.classList.add('dragover')"
                         ondragleave="this.classList.remove('dragover')"
                         ondrop="event.preventDefault();this.classList.remove('dragover');uploadScripts(event.dataTransfer.files)">
-                        <i class="fas fa-cloud-arrow-up text-dark-500 text-lg"></i>
-                        <p class="text-[11px] text-dark-500 mt-1">拖拽脚本文件到这里，或点击上传</p>
+                        <i class="fas fa-cloud-arrow-up text-slate-400 text-lg"></i>
+                        <p class="text-[11px] text-slate-400 mt-1">拖拽脚本文件到这里，或点击上传</p>
                     </div>
                     <div id="scriptList" class="space-y-1 mb-3 max-h-36 overflow-y-auto"></div>
-                    <label class="text-xs text-dark-400 mb-2 font-medium">脚本预览</label>
+                    <label class="text-xs text-slate-300 mb-2 font-medium">脚本预览</label>
                     <textarea id="scriptPreview"
                         class="code-editor flex-1 w-full rounded-xl p-4 border border-dark-700/50" readonly
                         placeholder="选择脚本以预览..."></textarea>
@@ -321,12 +321,12 @@
         <!-- ===== 右侧: 结果 ===== -->
         <aside class="w-96 flex-shrink-0 border-l border-dark-700/50 flex flex-col">
             <div class="p-3 border-b border-dark-700/50 flex items-center justify-between">
-                <h2 class="text-xs font-bold text-dark-400 uppercase tracking-wider"><i
+                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i
                         class="fas fa-chart-bar mr-1.5 text-brand-400"></i>执行结果</h2>
-                <span id="resultSummary" class="text-xs text-dark-500"></span>
+                <span id="resultSummary" class="text-xs text-slate-400"></span>
             </div>
             <div id="resultPanel" class="flex-1 overflow-y-auto p-3 space-y-2">
-                <div class="text-center text-dark-500 text-xs py-12"><i
+                <div class="text-center text-slate-400 text-xs py-12"><i
                         class="fas fa-rocket text-2xl mb-2 block text-dark-600"></i>选择服务器并执行任务</div>
             </div>
         </aside>
@@ -341,36 +341,36 @@
             <div class="space-y-2.5">
                 <div class="flex gap-2.5">
                     <div class="flex-1">
-                        <label class="text-[11px] text-dark-400 mb-0.5 block">主机 IP</label>
+                        <label class="text-[11px] text-slate-300 mb-0.5 block">主机 IP</label>
                         <input id="addHost" type="text" placeholder="192.168.1.1"
                             class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                     <div class="w-20">
-                        <label class="text-[11px] text-dark-400 mb-0.5 block">端口</label>
+                        <label class="text-[11px] text-slate-300 mb-0.5 block">端口</label>
                         <input id="addPort" type="number" value="22"
                             class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                 </div>
                 <div class="flex gap-2.5">
                     <div class="flex-1">
-                        <label class="text-[11px] text-dark-400 mb-0.5 block">用户名</label>
+                        <label class="text-[11px] text-slate-300 mb-0.5 block">用户名</label>
                         <input id="addUser" type="text" value="root"
                             class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                     <div class="flex-1">
-                        <label class="text-[11px] text-dark-400 mb-0.5 block">密码</label>
+                        <label class="text-[11px] text-slate-300 mb-0.5 block">密码</label>
                         <input id="addPass" type="password" placeholder="••••••"
                             class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                 </div>
                 <div class="flex gap-2.5">
                     <div class="flex-1">
-                        <label class="text-[11px] text-dark-400 mb-0.5 block">标签 (可选)</label>
+                        <label class="text-[11px] text-slate-300 mb-0.5 block">标签 (可选)</label>
                         <input id="addLabel" type="text" placeholder="Web-01"
                             class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                     </div>
                     <div class="flex-1">
-                        <label class="text-[11px] text-dark-400 mb-0.5 block">分组</label>
+                        <label class="text-[11px] text-slate-300 mb-0.5 block">分组</label>
                         <select id="addGroup"
                             class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                             <option value="">未分组</option>
@@ -380,7 +380,7 @@
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button onclick="closeModal('addServerModal')"
-                    class="px-3 py-1.5 rounded-lg text-dark-400 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
+                    class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
                 <button onclick="addServer()"
                     class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-green-600 to-green-500 text-white text-sm font-bold transition shadow-lg"><i
                         class="fas fa-check mr-1"></i>添加</button>
@@ -396,12 +396,12 @@
             </h3>
             <div class="space-y-2.5">
                 <div>
-                    <label class="text-[11px] text-dark-400 mb-0.5 block">分组名称</label>
+                    <label class="text-[11px] text-slate-300 mb-0.5 block">分组名称</label>
                     <input id="groupName" type="text" placeholder="例: 生产环境"
                         class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="text-[11px] text-dark-400 mb-0.5 block">父级分组</label>
+                    <label class="text-[11px] text-slate-300 mb-0.5 block">父级分组</label>
                     <select id="groupParent"
                         class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                         <option value="">顶层</option>
@@ -410,7 +410,7 @@
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button onclick="closeModal('groupModal')"
-                    class="px-3 py-1.5 rounded-lg text-dark-400 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
+                    class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
                 <button onclick="createGroup()"
                     class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white text-sm font-bold transition shadow-lg"><i
                         class="fas fa-check mr-1"></i>创建</button>
@@ -429,16 +429,16 @@
                     class="w-full text-left px-3 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-700 transition group">
                     <div class="text-sm font-medium text-white group-hover:text-brand-400"><i
                             class="fas fa-file-alt mr-2 text-brand-400"></i>从 serverInfo 文件导入</div>
-                    <div class="text-[11px] text-dark-500 mt-0.5 ml-6">自动读取同目录下的 serverInfo 文件</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5 ml-6">自动读取同目录下的 serverInfo 文件</div>
                 </button>
                 <div>
-                    <p class="text-[11px] text-dark-400 mb-1.5">或粘贴 (<span class="text-brand-400 font-mono">IP 端口 用户
+                    <p class="text-[11px] text-slate-300 mb-1.5">或粘贴 (<span class="text-brand-400 font-mono">IP 端口 用户
                             密码</span>)</p>
                     <textarea id="importText" class="code-editor w-full h-24 rounded-xl p-3 border border-dark-700/50"
                         placeholder="1.1.1.1 22 root pwd123"></textarea>
                 </div>
                 <div>
-                    <label class="text-[11px] text-dark-400 mb-0.5 block">导入到分组</label>
+                    <label class="text-[11px] text-slate-300 mb-0.5 block">导入到分组</label>
                     <select id="importGroup"
                         class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm focus:border-brand-500 focus:outline-none">
                         <option value="">未分组</option>
@@ -447,7 +447,7 @@
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button onclick="closeModal('importModal')"
-                    class="px-3 py-1.5 rounded-lg text-dark-400 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
+                    class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
                 <button onclick="importFromText()"
                     class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 text-white text-sm font-bold transition shadow-lg"><i
                         class="fas fa-download mr-1"></i>导入</button>
@@ -462,13 +462,13 @@
         <div class="glass rounded-2xl p-5 w-[360px] glow animate-fade">
             <h3 class="text-base font-bold text-white mb-3"><i class="fas fa-star text-amber-400 mr-2"></i>收藏代码片段</h3>
             <div>
-                <label class="text-[11px] text-dark-400 mb-0.5 block">片段名称</label>
+                <label class="text-[11px] text-slate-300 mb-0.5 block">片段名称</label>
                 <input id="snippetName" type="text" placeholder="例: 检查磁盘"
                     class="w-full px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 text-white text-sm font-mono focus:border-brand-500 focus:outline-none">
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button onclick="closeModal('saveSnippetModal')"
-                    class="px-3 py-1.5 rounded-lg text-dark-400 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
+                    class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 text-sm transition">取消</button>
                 <button onclick="doSaveSnippet()"
                     class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white text-sm font-bold transition shadow-lg"><i
                         class="fas fa-star mr-1"></i>收藏</button>
@@ -484,7 +484,7 @@
                 <h3 id="detailTitle" class="text-base font-bold text-white"><i
                         class="fas fa-terminal text-brand-400 mr-2"></i>执行详情</h3>
                 <button onclick="closeModal('detailModal')"
-                    class="p-1.5 rounded-lg text-dark-400 hover:text-white hover:bg-dark-700 transition"><i
+                    class="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 transition"><i
                         class="fas fa-times"></i></button>
             </div>
             <pre id="detailOutput"
@@ -499,16 +499,16 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-base font-bold text-white"><i class="fas fa-key text-brand-400 mr-2"></i>修改密码</h3>
                 <button onclick="closeModal('pwdModal')"
-                    class="p-1.5 rounded-lg text-dark-400 hover:text-white hover:bg-dark-700 transition"><i
+                    class="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-dark-700 transition"><i
                         class="fas fa-times"></i></button>
             </div>
             <div class="space-y-3">
                 <input type="password" id="oldPwd" placeholder="当前密码"
-                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-dark-500 focus:border-brand-500 focus:outline-none">
+                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none">
                 <input type="password" id="newPwd" placeholder="新密码（至少4位）"
-                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-dark-500 focus:border-brand-500 focus:outline-none">
+                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none">
                 <input type="password" id="newPwd2" placeholder="确认新密码"
-                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-dark-500 focus:border-brand-500 focus:outline-none">
+                    class="w-full px-3 py-2 bg-dark-800/50 border border-dark-600 rounded-lg text-sm text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none">
                 <button onclick="changePassword()"
                     class="w-full py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm rounded-lg transition">确认修改</button>
             </div>
@@ -722,7 +722,7 @@
         function renderTree() {
             const el = document.getElementById('serverTree');
             if (!servers.length && !groups.length) {
-                el.innerHTML = '<div class="text-center text-dark-500 text-xs py-12"><i class="fas fa-inbox text-2xl mb-2 block text-dark-600"></i>暂无服务器</div>';
+                el.innerHTML = '<div class="text-center text-slate-400 text-xs py-12"><i class="fas fa-inbox text-2xl mb-2 block text-dark-600"></i>暂无服务器</div>';
                 return;
             }
 
@@ -737,7 +737,7 @@
                     const groupServerCount = countGroupServers(g.id);
                     html += `<div class="mb-0.5" style="padding-left:${depth * 12}px">
                 <div class="group-header flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer" onclick="toggleGroup('${g.id}')">
-                    <i class="fas fa-chevron-${collapsed ? 'right' : 'down'} text-[9px] text-dark-500 w-3"></i>
+                    <i class="fas fa-chevron-${collapsed ? 'right' : 'down'} text-[9px] text-slate-400 w-3"></i>
                     <i class="fas fa-folder${collapsed ? '' : '-open'} text-xs text-amber-400/80"></i>
                     <span class="text-xs font-medium text-dark-300 flex-1">${esc(g.name)}</span>
                     <span class="text-[10px] text-dark-600">${groupServerCount}</span>
@@ -761,8 +761,8 @@
                     <div class="w-4 h-4 rounded border-[1.5px] flex items-center justify-center ${sel ? 'bg-brand-500 border-brand-500' : 'border-dark-500'}">
                         ${sel ? '<i class="fas fa-check text-white text-[8px]"></i>' : ''}
                     </div>
-                    <span class="text-xs font-mono text-white flex-1 truncate">${s.host}<span class="text-dark-500">:${s.port}</span></span>
-                    ${s.label ? `<span class="text-[10px] text-dark-500 truncate max-w-[60px]">${esc(s.label)}</span>` : ''}
+                    <span class="text-xs font-mono text-white flex-1 truncate">${s.host}<span class="text-slate-400">:${s.port}</span></span>
+                    ${s.label ? `<span class="text-[10px] text-slate-400 truncate max-w-[60px]">${esc(s.label)}</span>` : ''}
                     <button data-test="${s.id}" onclick="event.stopPropagation();testConn('${s.id}')" class="p-0.5 rounded text-dark-600 hover:text-yellow-400 transition" title="测试">
                         <i class="fas fa-bolt text-[10px]"></i>
                     </button>
@@ -775,7 +775,7 @@
             };
 
             renderGroup(null, 0);
-            el.innerHTML = html || '<div class="text-center text-dark-500 text-xs py-12">暂无服务器</div>';
+            el.innerHTML = html || '<div class="text-center text-slate-400 text-xs py-12">暂无服务器</div>';
         }
 
         function countGroupServers(gid) {
@@ -798,7 +798,7 @@
                 tab.classList.toggle('border-brand-500', m === mode);
                 tab.classList.toggle('text-brand-400', m === mode);
                 tab.classList.toggle('border-transparent', m !== mode);
-                tab.classList.toggle('text-dark-400', m !== mode);
+                tab.classList.toggle('text-slate-300', m !== mode);
             });
             if (mode === 'script') loadScripts();
             if (mode === 'snippet') renderSnippets();
@@ -873,7 +873,7 @@
         <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition group
             ${currentScript === s.name ? 'bg-brand-500/15 border border-brand-500/30' : 'hover:bg-dark-800 border border-transparent'}"
             onclick="selectScript('${esc(s.name)}')">
-            <i class="fas fa-file-code text-xs ${currentScript === s.name ? 'text-brand-400' : 'text-dark-500'}"></i>
+            <i class="fas fa-file-code text-xs ${currentScript === s.name ? 'text-brand-400' : 'text-slate-400'}"></i>
             <div class="flex-1 min-w-0">
                 <div class="text-xs font-mono ${currentScript === s.name ? 'text-brand-300' : 'text-white'}">${s.name}</div>
                 <div class="text-[10px] text-dark-600">${(s.size / 1024).toFixed(1)} KB</div>
@@ -944,7 +944,7 @@
         function resetBtn() { const b = document.getElementById('btnExecute'); b.disabled = false; b.innerHTML = '<i class="fas fa-play mr-1.5"></i>执行'; b.classList.remove('opacity-70'); }
 
         function startPolling(taskId) {
-            document.getElementById('resultPanel').innerHTML = '<div class="text-center py-10 animate-fade"><i class="fas fa-spinner fa-spin text-2xl text-brand-400 mb-3 block"></i><p class="text-xs text-dark-400">执行中...</p></div>';
+            document.getElementById('resultPanel').innerHTML = '<div class="text-center py-10 animate-fade"><i class="fas fa-spinner fa-spin text-2xl text-brand-400 mb-3 block"></i><p class="text-xs text-slate-300">执行中...</p></div>';
             document.getElementById('resultSummary').textContent = '运行中...';
             if (pollingTimer) clearInterval(pollingTimer);
             pollingTimer = setInterval(async () => {
@@ -980,16 +980,16 @@
             onclick="showDetail('${r.host}:${r.port}', ${JSON.stringify(JSON.stringify(r.output || ''))}, ${JSON.stringify(JSON.stringify(r.error || ''))}, ${r.exit_code})">
             <div class="flex items-center gap-2 mb-1">
                 <i class="fas ${s ? 'fa-check text-green-400' : 'fa-times text-red-400'} text-[10px]"></i>
-                <span class="text-xs font-mono text-white">${r.host}<span class="text-dark-500">:${r.port}</span></span>
-                <span class="ml-auto text-[10px] text-dark-500">${r.duration}s</span>
+                <span class="text-xs font-mono text-white">${r.host}<span class="text-slate-400">:${r.port}</span></span>
+                <span class="ml-auto text-[10px] text-slate-400">${r.duration}s</span>
             </div>
-            <pre class="text-[10px] text-dark-500 font-mono truncate pl-5">${esc(preview)}</pre>
+            <pre class="text-[10px] text-slate-400 font-mono truncate pl-5">${esc(preview)}</pre>
         </div>`;
             }).join('');
 
             if (wait > 0) {
                 panel.innerHTML += `<div class="rounded-lg p-2.5 border border-dark-700/30 bg-dark-800/30 flex items-center gap-2">
-            <i class="fas fa-spinner fa-spin text-[10px] text-yellow-400"></i><span class="text-xs text-dark-400">${wait} 台等待中...</span></div>`;
+            <i class="fas fa-spinner fa-spin text-[10px] text-yellow-400"></i><span class="text-xs text-slate-300">${wait} 台等待中...</span></div>`;
             }
         }
 
