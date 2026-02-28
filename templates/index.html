@@ -10,6 +10,11 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
+    <!-- xterm.js 终端模拟器 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -704,6 +709,41 @@
         </div>
     </div>
 
+    <!-- ===== Web 终端弹窗 ===== -->
+    <div id="terminalModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden items-center justify-center">
+        <div class="flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+            style="width:92vw;max-width:1200px;height:85vh">
+            <!-- 终端标题栏 -->
+            <div class="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="flex gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                    </div>
+                    <span id="terminalTitle" class="text-sm text-gray-300 font-mono"><i
+                            class="fas fa-terminal mr-1.5 text-green-400"></i>终端</span>
+                    <span id="terminalStatus" class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">
+                        <i class="fas fa-circle-notch fa-spin mr-1 text-[9px]"></i>连接中
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="disconnectTerminal()"
+                        class="text-xs px-3 py-1 rounded-lg bg-red-600/80 hover:bg-red-500 text-white transition">
+                        <i class="fas fa-plug-circle-xmark mr-1"></i>断开
+                    </button>
+                    <button onclick="closeTerminal()"
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- xterm.js 容器 -->
+            <div id="terminalContainer" class="flex-1 p-1 bg-black"></div>
+        </div>
+    </div>
+
     <!-- ===== 全部结果汇总弹窗 ===== -->
     <div id="allResultsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
         onclick="if(event.target===this)closeModal('allResultsModal')">
@@ -1100,6 +1140,9 @@
                     </div>
                     <span class="text-xs font-mono t-primary flex-1 truncate">${s.host}<span class="t-muted">:${s.port}</span></span>
                     ${s.label ? `<span class="text-[10px] t-muted truncate max-w-[60px]">${esc(s.label)}</span>` : ''}
+                    <button onclick="event.stopPropagation();openTerminal('${s.id}')" class="p-0.5 rounded t-hint hover:text-green-400 transition" title="终端">
+                        <i class="fas fa-terminal text-[10px]"></i>
+                    </button>
                     <button onclick="event.stopPropagation();editSingleServer('${s.id}')" class="p-0.5 rounded t-hint hover:text-amber-400 transition" title="编辑">
                         <i class="fas fa-pen text-[10px]"></i>
                     </button>
@@ -1492,6 +1535,158 @@
                 return header + '\n' + output + error;
             }).join('\n\n');
             navigator.clipboard.writeText(text).then(() => showToast('已复制全部结果'));
+        }
+
+        // ===== Web 终端 (xterm.js + WebSocket SSH) =====
+        let _term = null;
+        let _fitAddon = null;
+        let _socket = null;
+        let _termConnected = false;
+
+        function openTerminal(serverId) {
+            const server = servers.find(s => s.id === serverId);
+            if (!server) return showToast('服务器不存在', 'error');
+
+            // 显示弹窗
+            const modal = document.getElementById('terminalModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('terminalTitle').innerHTML =
+                `<i class="fas fa-terminal mr-1.5 text-green-400"></i>${server.host}:${server.port}`;
+            setTerminalStatus('connecting');
+
+            // 清理旧终端
+            if (_term) { _term.dispose(); _term = null; }
+            if (_socket) { _socket.disconnect(); _socket = null; }
+            document.getElementById('terminalContainer').innerHTML = '';
+
+            // 初始化 xterm.js
+            _term = new Terminal({
+                fontFamily: '"JetBrains Mono", "Cascadia Code", "Fira Code", monospace',
+                fontSize: 14,
+                lineHeight: 1.2,
+                cursorBlink: true,
+                cursorStyle: 'bar',
+                theme: {
+                    background: '#0d1117',
+                    foreground: '#c9d1d9',
+                    cursor: '#58a6ff',
+                    selectionBackground: '#264f78',
+                    black: '#484f58', red: '#ff7b72', green: '#7ee787',
+                    yellow: '#d29922', blue: '#58a6ff', magenta: '#bc8cff',
+                    cyan: '#39d353', white: '#b1bac4',
+                    brightBlack: '#6e7681', brightRed: '#ffa198', brightGreen: '#56d364',
+                    brightYellow: '#e3b341', brightBlue: '#79c0ff', brightMagenta: '#d2a8ff',
+                    brightCyan: '#56d364', brightWhite: '#f0f6fc'
+                },
+                allowProposedApi: true,
+                scrollback: 5000
+            });
+
+            _fitAddon = new FitAddon.FitAddon();
+            _term.loadAddon(_fitAddon);
+            _term.open(document.getElementById('terminalContainer'));
+
+            // 延迟 fit 确保容器尺寸就绪
+            setTimeout(() => {
+                _fitAddon.fit();
+                connectToServer(serverId);
+            }, 100);
+
+            // 监听窗口大小
+            window._termResizeHandler = () => {
+                if (_fitAddon && _term) {
+                    _fitAddon.fit();
+                    if (_socket && _termConnected) {
+                        _socket.emit('terminal_resize', { cols: _term.cols, rows: _term.rows });
+                    }
+                }
+            };
+            window.addEventListener('resize', window._termResizeHandler);
+        }
+
+        function connectToServer(serverId) {
+            _socket = io({ transports: ['websocket', 'polling'] });
+
+            _socket.on('connect', () => {
+                _socket.emit('connect_terminal', {
+                    server_id: serverId,
+                    cols: _term.cols,
+                    rows: _term.rows
+                });
+            });
+
+            _socket.on('terminal_connected', (data) => {
+                _termConnected = true;
+                setTerminalStatus('connected');
+                _term.writeln(`\x1b[32m✓ 已连接到 ${data.host}:${data.port}\x1b[0m\r\n`);
+                _term.focus();
+            });
+
+            _socket.on('terminal_output', (data) => {
+                if (_term) _term.write(data.data);
+            });
+
+            _socket.on('terminal_error', (data) => {
+                setTerminalStatus('error');
+                _term.writeln(`\r\n\x1b[31m✗ ${data.message}\x1b[0m`);
+            });
+
+            _socket.on('terminal_closed', (data) => {
+                setTerminalStatus('disconnected');
+                _term.writeln(`\r\n\x1b[33m⚠ ${data.message}\x1b[0m`);
+                _termConnected = false;
+            });
+
+            _socket.on('disconnect', () => {
+                if (_termConnected) {
+                    setTerminalStatus('disconnected');
+                    _term.writeln('\r\n\x1b[31m⚠ WebSocket 连接断开\x1b[0m');
+                    _termConnected = false;
+                }
+            });
+
+            // 键盘输入 -> SSH
+            _term.onData(data => {
+                if (_socket && _termConnected) {
+                    _socket.emit('terminal_input', { data });
+                }
+            });
+        }
+
+        function setTerminalStatus(status) {
+            const el = document.getElementById('terminalStatus');
+            const map = {
+                connecting: { cls: 'bg-yellow-500/20 text-yellow-400', html: '<i class="fas fa-circle-notch fa-spin mr-1 text-[9px]"></i>连接中' },
+                connected: { cls: 'bg-green-500/20 text-green-400', html: '<i class="fas fa-circle mr-1 text-[9px]"></i>已连接' },
+                disconnected: { cls: 'bg-gray-500/20 text-gray-400', html: '<i class="fas fa-circle mr-1 text-[9px]"></i>已断开' },
+                error: { cls: 'bg-red-500/20 text-red-400', html: '<i class="fas fa-exclamation-circle mr-1 text-[9px]"></i>错误' }
+            };
+            const s = map[status] || map.disconnected;
+            el.className = `text-xs px-2 py-0.5 rounded-full ${s.cls}`;
+            el.innerHTML = s.html;
+        }
+
+        function disconnectTerminal() {
+            if (_socket) {
+                _socket.emit('disconnect_terminal');
+                _termConnected = false;
+                setTerminalStatus('disconnected');
+                if (_term) _term.writeln('\r\n\x1b[33m⚠ 已手动断开连接\x1b[0m');
+            }
+        }
+
+        function closeTerminal() {
+            if (_socket) { _socket.disconnect(); _socket = null; }
+            if (_term) { _term.dispose(); _term = null; }
+            _termConnected = false;
+            _fitAddon = null;
+            if (window._termResizeHandler) {
+                window.removeEventListener('resize', window._termResizeHandler);
+            }
+            const modal = document.getElementById('terminalModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
     </script>
 </body>

@@ -16,6 +16,7 @@ from functools import wraps
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import paramiko
+from flask_socketio import SocketIO, emit
 
 # ===========================
 # 配置
@@ -35,6 +36,10 @@ SCRIPTS_DIR.mkdir(exist_ok=True)
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', uuid.uuid4().hex)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+
+# 活跃终端会话: sid -> {ssh, channel}
+terminal_sessions = {}
 
 # ===========================
 # 认证系统
@@ -650,9 +655,104 @@ def get_task(task_id):
     return jsonify(task)
 
 # ===========================
+# WebSocket 终端
+# ===========================
+@socketio.on('connect_terminal')
+def handle_connect_terminal(data):
+    """建立 SSH 终端连接"""
+    server_id = data.get('server_id')
+    servers = load_servers()
+    server = next((s for s in servers if s['id'] == server_id), None)
+    if not server:
+        emit('terminal_error', {'message': '服务器不存在'})
+        return
+
+    sid = request.sid
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(
+            hostname=server['host'],
+            port=int(server.get('port', 22)),
+            username=server.get('user', 'root'),
+            password=server.get('password', ''),
+            timeout=10,
+            allow_agent=False,
+            look_for_keys=False
+        )
+        cols = data.get('cols', 120)
+        rows = data.get('rows', 30)
+        channel = ssh.invoke_shell(term='xterm-256color', width=cols, height=rows)
+        channel.settimeout(0.1)
+
+        terminal_sessions[sid] = {'ssh': ssh, 'channel': channel, 'active': True}
+        emit('terminal_connected', {'host': server['host'], 'port': server.get('port', 22)})
+
+        # 后台线程持续读取 SSH 输出
+        def read_output():
+            while terminal_sessions.get(sid, {}).get('active'):
+                try:
+                    if channel.recv_ready():
+                        output = channel.recv(4096).decode('utf-8', errors='replace')
+                        socketio.emit('terminal_output', {'data': output}, to=sid)
+                    elif channel.exit_status_ready():
+                        socketio.emit('terminal_closed', {'message': '会话已结束'}, to=sid)
+                        break
+                    else:
+                        socketio.sleep(0.05)
+                except Exception:
+                    break
+            cleanup_session(sid)
+
+        socketio.start_background_task(read_output)
+
+    except Exception as e:
+        emit('terminal_error', {'message': f'连接失败: {str(e)}'})
+
+@socketio.on('terminal_input')
+def handle_terminal_input(data):
+    """接收终端输入"""
+    sess = terminal_sessions.get(request.sid)
+    if sess and sess.get('active'):
+        try:
+            sess['channel'].send(data.get('data', ''))
+        except Exception:
+            pass
+
+@socketio.on('terminal_resize')
+def handle_terminal_resize(data):
+    """终端大小改变"""
+    sess = terminal_sessions.get(request.sid)
+    if sess and sess.get('active'):
+        try:
+            sess['channel'].resize_pty(
+                width=data.get('cols', 120),
+                height=data.get('rows', 30)
+            )
+        except Exception:
+            pass
+
+@socketio.on('disconnect_terminal')
+def handle_disconnect_terminal():
+    cleanup_session(request.sid)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    cleanup_session(request.sid)
+
+def cleanup_session(sid):
+    sess = terminal_sessions.pop(sid, None)
+    if sess:
+        sess['active'] = False
+        try: sess['channel'].close()
+        except: pass
+        try: sess['ssh'].close()
+        except: pass
+
+# ===========================
 # 启动
 # ===========================
 if __name__ == "__main__":
     print("\n  🚀 批量服务器管理工具已启动")
     print("  📡 访问地址: http://0.0.0.0:5001\n")
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5001, debug=True, allow_unsafe_werkzeug=True)

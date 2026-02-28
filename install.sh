@@ -52,7 +52,7 @@ echo -e "${YELLOW}[3/5] 配置 Python 环境...${NC}"
 cd "$APP_DIR"
 python3 -m venv venv
 source venv/bin/activate
-pip install --quiet flask paramiko gunicorn
+pip install --quiet flask paramiko gunicorn flask-socketio gevent gevent-websocket
 echo -e "${GREEN}  ✓ Python 环境就绪${NC}"
 
 # 创建数据目录
@@ -99,6 +99,16 @@ server {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
+
+    location /socket.io {
+        proxy_pass http://127.0.0.1:$PORT/socket.io;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_read_timeout 86400;
+    }
 }
 EOF
 
@@ -119,7 +129,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=$APP_DIR
-ExecStart=$APP_DIR/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 4 --threads 2 --timeout 120 server:app
+ExecStart=$APP_DIR/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 --worker-class gthread server:app
 Restart=always
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1
